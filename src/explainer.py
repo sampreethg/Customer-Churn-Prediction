@@ -55,7 +55,10 @@ class ChurnExplainer:
         # Extract base value for Class 1 (Churn)
         exp_val = self.explainer.expected_value
         if isinstance(exp_val, (list, np.ndarray)):
-            self.base_value = float(exp_val[1])
+            if len(exp_val) > 1:
+                self.base_value = float(exp_val[1])
+            else:
+                self.base_value = float(exp_val[0])
         else:
             self.base_value = float(exp_val)
 
@@ -102,8 +105,12 @@ class ChurnExplainer:
             shap_vec = raw_shap[0, :, 1]
         elif isinstance(raw_shap, list) and len(raw_shap) >= 2:
             shap_vec = raw_shap[1][0]
+        elif isinstance(raw_shap, list) and len(raw_shap) == 1:
+            shap_vec = np.array(raw_shap[0]).flatten()
+        elif isinstance(raw_shap, np.ndarray):
+            shap_vec = raw_shap[0] if raw_shap.ndim == 2 else raw_shap.flatten()
         else:
-            shap_vec = raw_shap[0]
+            shap_vec = np.array(raw_shap).flatten()
 
         churn_proba = float(self.model.predict_proba(df_prepared)[0][1])
 

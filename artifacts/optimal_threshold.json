@@ -1,0 +1,8 @@
+{
+  "optimal_threshold": 0.07,
+  "winning_model": "CatBoost",
+  "mean_cv_roc_auc": 0.82334,
+  "max_net_profit": 20946.0,
+  "default_profit_at_0_5": -54576.0,
+  "profit_gain": 75522.0
+}
