@@ -13,9 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set standard application working directory
 WORKDIR /app
 
-# Create unprivileged system user for non-root execution
-RUN useradd -m -u 1000 -s /bin/bash apiuser
-
 # Cache pip dependency installation layer prior to copying application source
 COPY requirements.txt .
 RUN pip install --no-cache-dir --default-timeout=100 -r requirements.txt
@@ -26,8 +23,9 @@ COPY src/ /app/src/
 COPY models/ /app/models/
 COPY artifacts/ /app/artifacts/
 
-# Transition directory ownership to non-root user
-RUN chown -R apiuser:apiuser /app
+# Create unprivileged system user for non-root execution and transition ownership
+RUN useradd -m -u 1000 -s /bin/bash apiuser && \
+    chown -R apiuser:apiuser /app
 
 # Execute runtime process as non-root user
 USER apiuser
@@ -41,4 +39,3 @@ HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=10s \
 
 # Launch production ASGI server with multi-worker concurrency
 CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
-
