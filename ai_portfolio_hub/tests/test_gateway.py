@@ -111,3 +111,31 @@ def test_rl_cartpole_playback(client):
     assert len(data["state_history"]) == data["steps"]
     assert len(data["state_history"][0]) == 4  # 4D state vector
 
+
+def test_rag_ingest_and_query(client):
+    """Verify RAG document ingestion and grounded question answering."""
+    # Test Ingest
+    ingest_payload = {
+        "doc_id": "test_policy",
+        "text": "Model safety guardrails mandate strict adherence to privacy rules. All logs are purged after 90 days.",
+    }
+    resp_ingest = client.post("/api/v1/rag/ingest", json=ingest_payload)
+    assert resp_ingest.status_code == 200
+    ingest_data = resp_ingest.json()
+    assert ingest_data["chunks_created"] >= 1
+    assert ingest_data["total_indexed_chunks"] >= 1
+
+    # Test Query
+    query_payload = {
+        "question": "What is the policy for log purging and privacy?",
+        "dense_top_k": 4,
+        "rerank_top_n": 2,
+    }
+    resp_query = client.post("/api/v1/rag/query", json=query_payload)
+    assert resp_query.status_code == 200
+    query_data = resp_query.json()
+    assert "answer" in query_data
+    assert "citations" in query_data
+    assert "confidence_score" in query_data
+    assert "latency_ms" in query_data
+

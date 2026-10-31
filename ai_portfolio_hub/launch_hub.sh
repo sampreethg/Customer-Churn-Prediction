@@ -94,3 +94,4 @@ echo -e "• FastAPI Swagger Docs:   ${BLUE}http://localhost:8000/docs${NC}"
 echo -e "• Gateway Health Check:   ${BLUE}http://localhost:8000/health${NC}"
 echo -e "\nTo view live container logs, run:   ${YELLOW}docker compose logs -f${NC}"
 echo -e "To cleanly tear down the hub, run:  ${YELLOW}docker compose down${NC}\n"
+

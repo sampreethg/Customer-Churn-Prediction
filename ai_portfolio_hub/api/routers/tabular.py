@@ -45,11 +45,35 @@ async def predict_churn(customer: TabularInput, request: Request):
             detail="Churn prediction pipeline is not initialized or model file missing.",
         )
 
-    df = format_dataframe(customer)
+    df_raw = format_dataframe(customer)
+    df = df_raw.copy()
 
-    # 1. Compute churn probability
+    # 1. Compute churn probability with model feature alignment
     try:
-        proba = float(model.predict_proba(df)[0][1])
+        if hasattr(model, "feature_names_in_"):
+            expected_cols = [c for c in model.feature_names_in_ if c in df.columns]
+            # Try raw input first
+            try:
+                proba = float(model.predict_proba(df[expected_cols])[0][1])
+            except Exception:
+                # Encode categoricals to numeric for scikit-learn models
+                df_num = df.copy()
+                if "ContractType" in df_num.columns:
+                    df_num["ContractType"] = df_num["ContractType"].map(
+                        lambda x: 0 if "month" in str(x).lower() else (1 if "one" in str(x).lower() else 2)
+                    )
+                if "TechSupport" in df_num.columns:
+                    df_num["TechSupport"] = df_num["TechSupport"].map(
+                        lambda x: 1 if "yes" in str(x).lower() else 0
+                    )
+                if "PaymentMethod" in df_num.columns:
+                    df_num["PaymentMethod"] = df_num["PaymentMethod"].map(
+                        lambda x: 0 if "electronic" in str(x).lower() else (1 if "mail" in str(x).lower() else (2 if "bank" in str(x).lower() else 3))
+                    )
+                proba = float(model.predict_proba(df_num[expected_cols])[0][1])
+                df = df_num[expected_cols]
+        else:
+            proba = float(model.predict_proba(df)[0][1])
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

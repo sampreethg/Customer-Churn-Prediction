@@ -22,6 +22,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from dashboard.components import render_metric_card
 from dashboard.tabs.tab_nlp import render_tab_nlp
+from dashboard.tabs.tab_rag import render_rag_tab
 from dashboard.tabs.tab_rl import render_tab_rl
 from dashboard.tabs.tab_tabular import render_tab_tabular
 from dashboard.tabs.tab_vision import render_tab_vision
@@ -139,8 +140,9 @@ tab_labels = [
     "🖼️ 2. Computer Vision (Grad-CAM)",
     "💬 3. Transformer NLP (DistilBERT)",
     "🕹️ 4. Reinforcement Learning (D3QN)",
+    "📚 5. Generative AI (RAG)",
 ]
-t1, t2, t3, t4 = st.tabs(tab_labels)
+t1, t2, t3, t4, t5 = st.tabs(tab_labels)
 
 with t1:
     render_tab_tabular(api_base_url)
@@ -153,6 +155,9 @@ with t3:
 
 with t4:
     render_tab_rl(api_base_url)
+
+with t5:
+    render_rag_tab(api_base_url)
 
 st.markdown("---")
 st.markdown(

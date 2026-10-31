@@ -9,7 +9,7 @@ Provides strict serialization, type validation, and documentation schemas across
 """
 
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -110,4 +110,45 @@ class SystemHealthResponse(BaseModel):
     device: str
     models_loaded: Dict[str, bool]
     uptime_seconds: float
+
+
+class RAGIngestRequest(BaseModel):
+    """Schema for document text ingestion."""
+    doc_id: str = Field(..., min_length=1, max_length=100, description="Unique document identifier")
+    text: str = Field(..., min_length=10, description="Full raw text or Markdown content of the document")
+
+
+class RAGIngestResponse(BaseModel):
+    """Schema for ingestion response."""
+    doc_id: str
+    chunks_created: int
+    total_indexed_chunks: int
+    indexing_latency_ms: float
+
+
+class RAGQueryRequest(BaseModel):
+    """Schema for RAG question answering."""
+    question: str = Field(..., min_length=3, max_length=1000, description="User question")
+    dense_top_k: int = Field(8, ge=1, le=50, description="Number of dense semantic candidates to retrieve")
+    rerank_top_n: int = Field(3, ge=1, le=10, description="Number of candidates to re-rank with cross-encoder")
+
+
+class CitationItem(BaseModel):
+    """Schema for citation metadata."""
+    citation_id: int
+    doc_id: str
+    chunk_id: str
+    relevance_score: float
+    excerpt: str
+
+
+class RAGQueryResponse(BaseModel):
+    """Schema for grounded RAG answer."""
+    question: str
+    answer: str
+    citations: List[CitationItem]
+    retrieved_chunks: List[Dict[str, Any]]
+    confidence_score: float
+    hallucination_guardrail_triggered: bool
+    latency_ms: float
 

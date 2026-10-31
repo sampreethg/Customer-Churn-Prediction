@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MLOps Data Drift Report - 20261101_021635</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #0f172a; color: #f8fafc; padding: 30px; }
+        h1 { color: #38bdf8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e293b; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+        th { background: #0284c7; color: white; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>MLOps Data Drift & Stability Report</h1>
+    <p>Audit Generated at: 2026-11-01 02:16:35 UTC</p>
+    <table>
+        <thead>
+            <tr><th>Feature Name</th><th>KS Statistic</th><th>p-value</th><th>Status</th><th>Severity</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Tenure_Months</td><td>0.494</td><td>3.8177e-111</td><td style='color: red; font-weight:bold;'>DRIFT DETECTED</td><td>HIGH</td></tr><tr><td>MonthlyCharges</td><td>0.205</td><td>8.4936e-19</td><td style='color: red; font-weight:bold;'>DRIFT DETECTED</td><td>HIGH</td></tr><tr><td>TotalTickets</td><td>0.038</td><td>4.6596e-01</td><td style='color: green; font-weight:bold;'>STABLE</td><td>LOW</td></tr>
+        </tbody>
+    </table>
+</body>
+</html>

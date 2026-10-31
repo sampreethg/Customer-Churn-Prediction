@@ -19,7 +19,7 @@ from .config import (
     TRANSFORMER_PATH,
     VISION_MODEL_PATH,
 )
-from .routers import nlp, rl, tabular, vision
+from .routers import nlp, rag, rl, tabular, vision
 from .schemas import SystemHealthResponse
 
 # App Startup Timestamp
@@ -104,7 +104,19 @@ async def lifespan(app: FastAPI):
         from d3qn_cartpole.src.model import DuelingDQN
         rl_net = DuelingDQN(state_dim=4, action_dim=2).to(DEVICE)
         if RL_MODEL_PATH.is_file():
-            rl_net.load_state_dict(torch.load(RL_MODEL_PATH, map_location=DEVICE))
+            checkpoint = torch.load(RL_MODEL_PATH, map_location=DEVICE)
+            try:
+                rl_net.load_state_dict(checkpoint)
+            except Exception:
+                renamed = {}
+                for k, v in checkpoint.items():
+                    if k.startswith("feature_trunk."):
+                        renamed[k.replace("feature_trunk.", "feature_network.")] = v
+                    elif k.startswith("feature_network."):
+                        renamed[k.replace("feature_network.", "feature_trunk.")] = v
+                    else:
+                        renamed[k] = v
+                rl_net.load_state_dict(renamed, strict=False)
             print(f"[OK] RL D3QN Model loaded from: {RL_MODEL_PATH.name}")
         else:
             print("[OK] RL D3QN Model initialized in memory.")
@@ -114,14 +126,35 @@ async def lifespan(app: FastAPI):
         print(f"[Notice] RL D3QN initialization note: {exc}")
         app.state.rl_model = None
 
+    # 5. Initialize Production RAG Pipeline
+    try:
+        from rag.pipeline import RAGPipeline
+        app.state.rag_pipeline = RAGPipeline()
+        # Seed core knowledge base
+        app.state.rag_pipeline.ingest_document(
+            doc_id="ai_portfolio_overview",
+            text=(
+                "The Unified Multi-Domain AI Portfolio Hub consolidates four enterprise machine learning pillars: "
+                "1. Tabular Churn Prediction utilizing CatBoost and Scikit-Learn with cost-optimal Bayes thresholding and SHAP explainability. "
+                "2. Computer Vision with Keras CNN and dynamic Grad-CAM heatmaps for interpretable CIFAR-10 classification. "
+                "3. NLP Contextual Sentiment Analysis using Hugging Face DistilBERT fine-tuned for high-throughput inference. "
+                "4. Continuous and Discrete Deep Reinforcement Learning with PER-D3QN and Soft Actor-Critic (SAC). "
+                "The infrastructure is orchestrated using Docker Compose across an isolated bridge network with automated health checks."
+            ),
+        )
+        print("[OK] Production RAG Pipeline initialized and seeded.")
+    except Exception as exc:
+        print(f"[Notice] RAG Pipeline note: {exc}")
+        app.state.rag_pipeline = None
+
     print("=" * 65 + "\n")
     yield
 
 
 app = FastAPI(
     title="Unified Multi-Domain AI Portfolio Gateway",
-    description="High-performance asynchronous gateway consolidating Tabular, Vision, NLP, and RL systems.",
-    version="1.0.0",
+    description="High-performance asynchronous gateway consolidating Tabular, Vision, NLP, RL, and Generative RAG systems.",
+    version="1.1.0",
     lifespan=lifespan,
 )
 
@@ -138,18 +171,20 @@ app.include_router(tabular.router, prefix="/api/v1")
 app.include_router(vision.router, prefix="/api/v1")
 app.include_router(nlp.router, prefix="/api/v1")
 app.include_router(rl.router, prefix="/api/v1")
+app.include_router(rag.router, prefix="/api/v1")
 
 
 @app.get("/health", response_model=SystemHealthResponse, tags=["Diagnostics"])
 async def health_check():
     """
-    Global readiness and telemetry endpoint verifying residency for all four AI models.
+    Global readiness and telemetry endpoint verifying residency for all five AI models/pipelines.
     """
     models_status = {
         "tabular_churn": getattr(app.state, "churn_model", None) is not None,
         "vision_cnn": getattr(app.state, "vision_model", None) is not None,
         "nlp_transformer": getattr(app.state, "nlp_model", None) is not None,
         "rl_d3qn": getattr(app.state, "rl_model", None) is not None,
+        "generative_rag": getattr(app.state, "rag_pipeline", None) is not None,
     }
     is_healthy = any(models_status.values())
     return SystemHealthResponse(
@@ -165,7 +200,7 @@ async def root():
     return {
         "title": "Unified Multi-Domain AI Portfolio Hub API",
         "documentation": "/docs",
-        "version": "1.0.0",
-        "domains": ["/api/v1/tabular", "/api/v1/vision", "/api/v1/nlp", "/api/v1/rl"],
+        "version": "1.1.0",
+        "domains": ["/api/v1/tabular", "/api/v1/vision", "/api/v1/nlp", "/api/v1/rl", "/api/v1/rag"],
     }
 

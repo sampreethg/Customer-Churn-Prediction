@@ -90,3 +90,4 @@ Write-Host "- FastAPI Swagger Docs:   http://localhost:8000/docs" -ForegroundCol
 Write-Host "- Gateway Health Check:   http://localhost:8000/health" -ForegroundColor Cyan
 Write-Host "`nTo view live container logs, run:   docker compose logs -f" -ForegroundColor Yellow
 Write-Host "To cleanly tear down the hub, run:  docker compose down`n" -ForegroundColor Yellow
+

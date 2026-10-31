@@ -37,3 +37,6 @@ temp/
 tmp/
 # Large Model Weights (> 50MB)
 *.safetensors
+*.vsix
+models/optimized/
+ai_portfolio_hub/models/optimized/
