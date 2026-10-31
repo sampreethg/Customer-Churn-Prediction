@@ -29,6 +29,7 @@ known-first-party = ["src", "api", "dashboard", "data"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-v --strict-markers --durations=10"
 filterwarnings = [
     "ignore::DeprecationWarning",
