@@ -1,0 +1,36 @@
+# Multi-domain AI Gateway FastAPI Container
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Cache dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --default-timeout=120 -r requirements.txt
+
+# Copy codebase and models
+COPY api/ /app/api/
+COPY models/ /app/models/
+
+# Non-root execution
+RUN useradd -m -u 1000 -s /bin/bash apiuser && \
+    chown -R apiuser:apiuser /app
+
+USER apiuser
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=15s \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+

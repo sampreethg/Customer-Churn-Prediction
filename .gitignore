@@ -35,4 +35,5 @@ Thumbs.db
 logs/
 temp/
 tmp/
-
+# Large Model Weights (> 50MB)
+*.safetensors

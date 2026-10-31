@@ -1,0 +1,52 @@
+services:
+  hub_api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: hub_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=info
+      - CHURN_MODEL_PATH=/app/models/best_churn_model.joblib
+      - VISION_MODEL_PATH=/app/models/best_cnn_model.keras
+      - RL_MODEL_PATH=/app/models/best_per_d3qn.pt
+    volumes:
+      - ./models:/app/models:ro
+    networks:
+      - ai_hub_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  hub_dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: hub_dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://hub_api:8000
+    depends_on:
+      hub_api:
+        condition: service_healthy
+    networks:
+      - ai_hub_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8501/_stcore/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  ai_hub_net:
+    name: ai_hub_network
+    driver: bridge
+
