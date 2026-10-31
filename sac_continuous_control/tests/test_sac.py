@@ -1,17 +1,17 @@
 import sys
 from pathlib import Path
-import pytest
-import torch
+
 import numpy as np
+import torch
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.agent import SACAgent
 from src.config import SACConfig
 from src.model import GaussianPolicy, TwinQNetwork
 from src.replay_buffer import ContinuousReplayBuffer
-from src.agent import SACAgent
 
 
 def test_gaussian_policy_action_bounds():

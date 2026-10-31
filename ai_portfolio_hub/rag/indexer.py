@@ -4,7 +4,8 @@ Encodes document chunks into normalized dense vector embeddings and provides
 efficient inner product / cosine similarity nearest neighbor search.
 """
 
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List
+
 import numpy as np
 
 
@@ -31,8 +32,8 @@ class DenseVectorIndex:
         if self.encoder is not None:
             emb = self.encoder.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
             return emb.astype(np.float32)
-        
-        # Robust fallback: normalized hashed semantic feature vectors
+
+        # Deterministic fallback: normalized hashed semantic feature vectors
         vectors = []
         for text in texts:
             words = text.lower().split()
@@ -66,7 +67,7 @@ class DenseVectorIndex:
         if len(self.chunks) == 0:
             return []
 
-        q_emb = self._encode_text([query])[0]  # shape (dim,)
+        q_emb = self._encode_text([query])[0] # shape (dim,)
         # Cosine similarity is dot product when vectors are normalized
         sims = np.dot(self.embeddings, q_emb)
 

@@ -1,8 +1,7 @@
 """Mathematical property validation for continuous Soft Actor-Critic (SAC)."""
 
-import pytest
 import torch
-import torch.nn as nn
+
 from sac_continuous_control.src.model import GaussianPolicy
 
 

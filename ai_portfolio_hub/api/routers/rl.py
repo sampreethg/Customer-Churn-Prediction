@@ -7,18 +7,20 @@ Endpoints:
 """
 
 from typing import List
-from fastapi import APIRouter, HTTPException, Request, status
+
 import gymnasium as gym
 import numpy as np
 import torch
+from fastapi import APIRouter, Depends, Request
 
 from ..config import DEVICE
+from ..rate_limiter import rate_limit
 from ..schemas import RLPlaybackRequest, RLPlaybackResponse
 
 router = APIRouter(prefix="/rl", tags=["Reinforcement Learning"])
 
 
-@router.post("/playback", response_model=RLPlaybackResponse)
+@router.post("/playback", response_model=RLPlaybackResponse, dependencies=[Depends(rate_limit(10))])
 async def run_rl_playback(payload: RLPlaybackRequest, request: Request):
     """
     Execute simulation trial on Gymnasium CartPole-v1 using trained D3QN policy.

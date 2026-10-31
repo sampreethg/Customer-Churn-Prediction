@@ -172,7 +172,7 @@ class ChurnExplainer:
         """
         explanation = self.explain_instance(customer_df)
         features = explanation["features"][:top_n]
-        features = list(reversed(features))  # Bottom to top for horizontal bar
+        features = list(reversed(features)) # Bottom to top for horizontal bar
 
         names = [f["feature_name"] for f in features]
         values = [f["shap_value"] for f in features]
@@ -220,7 +220,7 @@ class ChurnExplainer:
                 return str(out.resolve())
             return fig
 
-        except ImportError:  # pragma: no cover
+        except ImportError: # pragma: no cover
             # Fallback using PIL
             from PIL import Image, ImageDraw
 
@@ -238,7 +238,7 @@ class ChurnExplainer:
             center_x = 450
             start_y = 80
             row_h = 36
-            scale = 800  # pixels per unit SHAP
+            scale = 800 # pixels per unit SHAP
 
             draw.line(
                 [(center_x, start_y - 10), (center_x, start_y + len(features) * row_h)],

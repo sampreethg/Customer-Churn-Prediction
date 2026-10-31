@@ -35,8 +35,18 @@ Thumbs.db
 logs/
 temp/
 tmp/
+# Environment and secrets
+.env
+.env.*
+.env.local
+.env.development
+.env.test
+.env.production
+!.env.example
+
 # Large Model Weights (> 50MB)
 *.safetensors
 *.vsix
 models/optimized/
 ai_portfolio_hub/models/optimized/
+

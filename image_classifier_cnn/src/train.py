@@ -6,8 +6,10 @@ and generates training history diagnostic visualizations.
 """
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
+
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,7 +26,7 @@ from .config import (
     REDUCE_LR_PATIENCE,
     TRAINING_HISTORY_PATH,
 )
-from .dataset import create_tf_dataset, get_augmentation_pipeline
+from .dataset import create_tf_dataset
 
 
 def plot_training_history(
@@ -173,10 +175,10 @@ def train_model(
     ]
 
     print("\n" + "=" * 60)
-    print("                STAGE: MODEL TRAINING LOOP")
+    print(" STAGE: MODEL TRAINING LOOP")
     print("=" * 60)
-    print(f"Max Epochs:        {epochs}")
-    print(f"Batch Size:        {batch_size}")
+    print(f"Max Epochs: {epochs}")
+    print(f"Batch Size: {batch_size}")
     print(f"Data Augmentation: {'Enabled' if use_augmentation else 'Disabled'}")
     print(f"Checkpoint Target: {model_save_path.resolve()}\n")
 

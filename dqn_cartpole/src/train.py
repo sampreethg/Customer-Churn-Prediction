@@ -8,9 +8,9 @@ Orchestrates training episodes, step-level policy updates, exponential epsilon d
 from collections import deque
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
 import gymnasium as gym
 import numpy as np
-import torch
 
 from .agent import DQNAgent
 from .config import (
@@ -79,15 +79,15 @@ def train_dqn(
     is_solved = False
 
     print("\n" + "=" * 65)
-    print(f"        STARTING DQN TRAINING: {env_name}")
+    print(f" STARTING DQN TRAINING: {env_name}")
     print("=" * 65)
-    print(f"Max Episodes:      {max_episodes}")
-    print(f"Solved Threshold:  {solved_reward} (over {eval_window} consecutive episodes)")
-    print(f"Replay Capacity:   {agent.memory.capacity}")
-    print(f"Batch Size:        {agent.batch_size}")
-    print(f"Discount (Gamma):  {agent.gamma}")
-    print(f"Target Sync Mode:  {'Soft Polyak (tau=0.005)' if use_soft_update else f'Hard (every {TARGET_UPDATE_FREQ} eps)'}")
-    print(f"Compute Device:    {agent.device}\n")
+    print(f"Max Episodes: {max_episodes}")
+    print(f"Solved Threshold: {solved_reward} (over {eval_window} consecutive episodes)")
+    print(f"Replay Capacity: {agent.memory.capacity}")
+    print(f"Batch Size: {agent.batch_size}")
+    print(f"Discount (Gamma): {agent.gamma}")
+    print(f"Target Sync Mode: {'Soft Polyak (tau=0.005)' if use_soft_update else f'Hard (every {TARGET_UPDATE_FREQ} eps)'}")
+    print(f"Compute Device: {agent.device}\n")
 
     for episode in range(1, max_episodes + 1):
         state, _ = env.reset(seed=seed + episode)

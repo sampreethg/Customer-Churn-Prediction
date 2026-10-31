@@ -46,13 +46,13 @@ from src.pipeline import build_preprocessor
 
 
 # -----------------------------------------------------------------------------
-# Estimator Factory with Graceful Robust Fallbacks
+# Estimator Factory with Fallback Selection
 # -----------------------------------------------------------------------------
 def get_benchmark_models() -> dict:
     """
     Construct dictionary of candidate estimators.
     Uses official XGBoost, LightGBM, CatBoost when installed, falling back
-    to robust gradient boosting estimators with identical scikit-learn API.
+    to standard gradient boosting estimators with identical scikit-learn API.
     """
     models = {}
 
@@ -195,7 +195,7 @@ def optimize_decision_threshold(
 # -----------------------------------------------------------------------------
 def run_benchmark():
     print("=" * 70)
-    print("  MULTI-MODEL BENCHMARK, 5-FOLD CV & THRESHOLD OPTIMIZER")
+    print(" MULTI-MODEL BENCHMARK, 5-FOLD CV & THRESHOLD OPTIMIZER")
     print("=" * 70)
 
     # 1. Ensure Directories Exist
@@ -270,7 +270,7 @@ def run_benchmark():
         mean_f1 = np.mean([m["f1"] for m in fold_metrics])
         mean_acc = np.mean([m["acc"] for m in fold_metrics])
         print(
-            f"  -> Mean CV ROC-AUC: {mean_auc:.4f} | F1-Score: {mean_f1:.4f} | Accuracy: {mean_acc:.4f}"
+            f" -> Mean CV ROC-AUC: {mean_auc:.4f} | F1-Score: {mean_f1:.4f} | Accuracy: {mean_acc:.4f}"
         )
 
         model_oof_probas[model_name] = oof_probas
@@ -317,9 +317,9 @@ def run_benchmark():
     print(f"\n[Threshold Optimization] Optimal Decision Threshold tau*: {optimal_tau:.3f}")
     best_profit = df_curve.loc[df_curve["threshold"] == optimal_tau, "net_profit"].values[0]
     default_profit = df_curve.loc[df_curve["threshold"] == 0.50, "net_profit"].values[0]
-    print(f"  -> Profit at tau* ({optimal_tau:.2f}): ${best_profit:,.2f}")
-    print(f"  -> Profit at default (0.50): ${default_profit:,.2f}")
-    print(f"  -> Net Economic Uplift: +${(best_profit - default_profit):,.2f}")
+    print(f" -> Profit at tau* ({optimal_tau:.2f}): ${best_profit:,.2f}")
+    print(f" -> Profit at default (0.50): ${default_profit:,.2f}")
+    print(f" -> Net Economic Uplift: +${(best_profit - default_profit):,.2f}")
 
     # Save optimal threshold record
     threshold_meta = {
@@ -424,7 +424,7 @@ def run_benchmark():
         print(f"[Artifact Saved] Feature importance chart: {fi_path}")
 
     print("\n" + "=" * 70)
-    print("  BENCHMARK & OPTIMIZATION COMPLETED SUCCESSFULLY!")
+    print(" BENCHMARK & OPTIMIZATION COMPLETED SUCCESSFULLY!")
     print("=" * 70)
 
 

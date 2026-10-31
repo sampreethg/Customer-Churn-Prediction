@@ -1,8 +1,7 @@
 """Alerting and incident dispatch for model drift events."""
 
-from typing import Dict, Any
-import json
 import logging
+from typing import Any, Dict
 
 logger = logging.getLogger("mlops_alerting")
 
@@ -32,9 +31,9 @@ class DriftAlertManager:
         }
 
         if drift_detected:
-            print(f"\n[CRITICAL MLOps ALERT] Dataset drift detected! Triggering automated retraining pipeline.")
+            print("\n[CRITICAL MLOps ALERT] Dataset drift detected! Triggering automated retraining pipeline.")
             print(f"Summary: {alert_payload['summary']}")
         else:
-            print(f"[OK MLOps Telemetry] Baseline feature distributions remain stable.")
+            print("[OK MLOps Telemetry] Baseline feature distributions remain stable.")
 
         return alert_payload

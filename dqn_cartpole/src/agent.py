@@ -5,9 +5,10 @@ Handles epsilon-greedy exploration, experience replay storage, Bellman loss comp
 gradient clipping, and policy/target network synchronization.
 """
 
-from pathlib import Path
 import random
+from pathlib import Path
 from typing import Optional
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -168,7 +169,7 @@ class DQNAgent:
         if soft:
             tau_val = tau if tau is not None else self.tau
             for target_param, policy_param in zip(
-                self.target_net.parameters(), self.policy_net.parameters()
+                self.target_net.parameters(), self.policy_net.parameters(), strict=False
             ):
                 target_param.data.copy_(
                     tau_val * policy_param.data + (1.0 - tau_val) * target_param.data
@@ -187,7 +188,7 @@ class DQNAgent:
         """
         Load policy network weights from disk and synchronize target network.
         """
-        state_dict = torch.load(filepath, map_location=self.device)
+        state_dict = torch.load(filepath, map_location=self.device, weights_only=True)
         self.policy_net.load_state_dict(state_dict)
         self.target_net.load_state_dict(state_dict)
         self.policy_net.eval()

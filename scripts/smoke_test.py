@@ -5,11 +5,13 @@ Starts FastAPI server in background, tests endpoints, and terminates cleanly.
 import subprocess
 import sys
 import time
+
 import requests
+
 
 def main():
     print("==================================================")
-    print("        PHASE 4: LOCAL SERVICE SMOKE TESTS        ")
+    print(" PHASE 4: LOCAL SERVICE SMOKE TESTS ")
     print("==================================================")
 
     # 1. Start uvicorn process
@@ -24,7 +26,7 @@ def main():
         # Wait up to 15s for server to become responsive
         url_health = "http://127.0.0.1:8000/health"
         server_ready = False
-        for attempt in range(15):
+        for _attempt in range(15):
             time.sleep(1)
             try:
                 r = requests.get(url_health, timeout=2)
@@ -94,7 +96,7 @@ def main():
         print(f"-> Summary Narrative: {explain_data['summary_narrative']}")
 
         print("\n==================================================")
-        print("    [SUCCESS] ALL LOCAL SMOKE TESTS PASSED!       ")
+        print(" [SUCCESS] ALL LOCAL SMOKE TESTS PASSED! ")
         print("==================================================")
 
     finally:

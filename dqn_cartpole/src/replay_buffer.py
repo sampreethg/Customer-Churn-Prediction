@@ -5,10 +5,11 @@ Stores chronological agent-environment interaction tuples and breaks temporal co
 by uniformly sampling independent mini-batches for off-policy Q-learning gradient updates.
 """
 
+import random
 from collections import deque
 from dataclasses import dataclass
-import random
 from typing import List, Optional, Tuple
+
 import numpy as np
 import torch
 

@@ -9,7 +9,7 @@ Verifies:
 
 import sys
 from pathlib import Path
-import pytest
+
 import torch
 
 # Ensure project root is in sys.path
@@ -61,14 +61,14 @@ def test_dueling_mean_centering_mathematical_property():
 
     with torch.no_grad():
         feat = model.feature_network(states)
-        val = model.value_stream(feat)             # Shape: (50, 1)
-        q_vals = model(states)                     # Shape: (50, 2)
+        val = model.value_stream(feat) # Shape: (50, 1)
+        q_vals = model(states) # Shape: (50, 2)
 
     # Difference between Q and V
-    diff = q_vals - val                            # Shape: (50, 2)
+    diff = q_vals - val # Shape: (50, 2)
 
     # Mean across action dimension
-    mean_diff = diff.mean(dim=-1)                  # Shape: (50,)
+    mean_diff = diff.mean(dim=-1) # Shape: (50,)
 
     # Must be zero within floating point epsilon (1e-6)
     assert torch.allclose(

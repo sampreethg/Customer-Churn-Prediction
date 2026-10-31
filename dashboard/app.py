@@ -27,7 +27,7 @@ from src.explainer import ChurnExplainer
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="Customer Churn Intelligence Platform",
-    page_icon="📊",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -108,7 +108,7 @@ def predict_single_customer(payload: dict, api_url: str, is_api_online: bool, lo
             if resp.status_code == 200:
                 return resp.json()
         except Exception:
-            pass  # Fallback to local prediction
+            pass # Fallback to local prediction
 
     # Local fallback inference
     if local_model is None:
@@ -137,7 +137,7 @@ def explain_single_customer(
             if resp.status_code == 200:
                 return resp.json()
         except Exception:
-            pass  # Fallback to local explainer
+            pass # Fallback to local explainer
 
     if local_explainer is None:
         raise RuntimeError("SHAP explainer engine is not available locally or via API.")
@@ -156,7 +156,7 @@ def predict_batch_customers(
             if resp.status_code == 200:
                 return resp.json().get("predictions", [])
         except Exception:
-            pass  # Fallback to local model
+            pass # Fallback to local model
 
     if local_model is None:
         raise RuntimeError("Neither the FastAPI service nor the local model artifact is available.")
@@ -184,37 +184,37 @@ def predict_batch_customers(
 # -----------------------------------------------------------------------------
 def main():
     # Sidebar
-    st.sidebar.title("⚙️ System Control")
+    st.sidebar.title(" System Control")
     api_url = st.sidebar.text_input("FastAPI Endpoint URL", value=DEFAULT_API_URL)
     is_api_online = check_api_health(api_url)
 
     if is_api_online:
-        st.sidebar.success(f"🟢 API Service: Connected ({api_url})")
+        st.sidebar.success(f"[Low] API Service: Connected ({api_url})")
         local_model = None
         local_explainer = None
     else:
-        st.sidebar.warning("🟡 API Service: Offline (Using Local Fallback)")
+        st.sidebar.warning("[Medium] API Service: Offline (Using Local Fallback)")
         local_model = load_local_model(MODEL_PATH)
         local_explainer = load_local_explainer(MODEL_PATH)
         if local_model is not None:
-            st.sidebar.info("📦 Local Model & SHAP Explainer: Ready")
+            st.sidebar.info(" Local Model & SHAP Explainer: Ready")
         else:
-            st.sidebar.error("❌ Local Model Artifact Not Found!")
+            st.sidebar.error("[FAIL] Local Model Artifact Not Found!")
 
     st.sidebar.markdown("---")
     st.sidebar.markdown(
         """
         **Platform Capabilities:**
-        - 🎯 **Interactive Risk Simulator**
-        - 🔬 **Local SHAP Feature Attribution**
-        - 📁 **Batch CSV Cohort Prioritization**
-        - 📈 **Model Diagnostics & Drivers**
-        - 🛡️ **Dual Inference Resilience**
+        - **Interactive Risk Simulator**
+        - **Local SHAP Feature Attribution**
+        - **Batch CSV Cohort Prioritization**
+        - **Model Diagnostics & Drivers**
+        - **Dual Inference Resilience**
         """
     )
 
     # Main Header
-    st.title("📊 Customer Churn Intelligence & Retention Simulator")
+    st.title(" Customer Churn Intelligence & Retention Simulator")
     st.markdown(
         "Production ML system for predicting customer attrition risk, simulating account dynamics, "
         "and prescribing immediate intervention plays with explainable AI (SHAP)."
@@ -222,17 +222,17 @@ def main():
 
     if not is_api_online:
         st.info(
-            "ℹ️ **Notice:** The FastAPI backend is currently offline. The platform has automatically "
+            "[Notice] **Notice:** The FastAPI backend is currently offline. The platform has automatically "
             "switched to **Local Fallback Inference Mode** using the cached Scikit-Learn pipeline and TreeExplainer.",
-            icon="🛡️",
+            icon="",
         )
 
     # Navigation Tabs
     tab1, tab2, tab3 = st.tabs(
         [
-            "🎯 Single Customer Simulator & XAI",
-            "📁 Batch Cohort Scoring & Prioritization",
-            "📈 Model Performance & Drivers",
+            " Single Customer Simulator & XAI",
+            " Batch Cohort Scoring & Prioritization",
+            " Model Performance & Drivers",
         ]
     )
 
@@ -297,9 +297,9 @@ def main():
                 paperless = st.selectbox("Paperless Invoicing", options=["Yes", "No"], index=0)
 
             st.markdown("#### 3. Explainability Options")
-            show_shap = st.toggle("🔬 Show Detailed Risk Factor Breakdown (SHAP)", value=True)
+            show_shap = st.toggle(" Show Detailed Risk Factor Breakdown (SHAP)", value=True)
 
-            st.button("🚀 Analyze Churn Risk", type="primary", use_container_width=True)
+            st.button(" Analyze Churn Risk", type="primary", use_container_width=True)
 
         with col_results:
             st.markdown("#### Real-Time Diagnostics & Retention Strategy")
@@ -329,7 +329,7 @@ def main():
 
                 # Render SHAP Feature Attributions Breakdown
                 if show_shap:
-                    st.markdown("#### 🔬 Explainable AI (SHAP) Factor Attribution")
+                    st.markdown("#### Explainable AI (SHAP) Factor Attribution")
                     with st.spinner("Computing TreeExplainer Shapley attributions..."):
                         explanation = explain_single_customer(
                             payload, api_url, is_api_online, local_explainer
@@ -337,7 +337,7 @@ def main():
                         render_shap_breakdown(explanation, top_n=8)
 
                 # Profile Summary breakdown
-                with st.expander("📋 Evaluated Feature Profile Snapshot", expanded=not show_shap):
+                with st.expander(" Evaluated Feature Profile Snapshot", expanded=not show_shap):
                     prof_df = pd.DataFrame(
                         [
                             {"Attribute": "Tenure", "Value": f"{tenure_months} months"},
@@ -433,7 +433,7 @@ def main():
         with c2:
             st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
             st.download_button(
-                label="📥 Download CSV Template",
+                label=" Download CSV Template",
                 data=sample_csv,
                 file_name="sample_churn_batch_template.csv",
                 mime="text/csv",
@@ -473,7 +473,7 @@ def main():
 
                     render_batch_summary(scored_df)
 
-                    st.markdown("### 📋 Prioritized Account Action List")
+                    st.markdown("### Prioritized Account Action List")
                     filter_col1, filter_col2 = st.columns([1, 2])
                     with filter_col1:
                         risk_filter = st.selectbox(
@@ -520,7 +520,7 @@ def main():
 
                     export_csv = filtered_df.to_csv(index=False).encode("utf-8")
                     st.download_button(
-                        label="📥 Export Prioritized Retention Task List (.csv)",
+                        label=" Export Prioritized Retention Task List (.csv)",
                         data=export_csv,
                         file_name="prioritized_retention_list.csv",
                         mime="text/csv",
@@ -578,7 +578,7 @@ def main():
                 str(roc_img), caption="Receiver Operating Characteristic (ROC) Curve", width=700
             )
 
-        st.markdown("### 🔍 Strategic Takeaways")
+        st.markdown("### Strategic Takeaways")
         st.markdown(
             """
             1. **Tenure & Monthly Charges Drive 55%+ of Hazard:** Newer accounts subject to high initial monthly bills form the epicenter of cancellation risk.

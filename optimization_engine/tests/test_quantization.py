@@ -2,10 +2,10 @@
 
 import sys
 from pathlib import Path
-import pytest
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:

@@ -12,7 +12,9 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
-from fastapi import BackgroundTasks, FastAPI, HTTPException, status
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from api.schemas import (
     BatchCustomerInput,
@@ -22,7 +24,9 @@ from api.schemas import (
     ExplanationResponse,
 )
 from src.alerting import WebhookNotifier
+from src.auth import require_api_key
 from src.explainer import ChurnExplainer
+from src.rate_limiter import rate_limit
 
 # Resolve default model artifact path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -116,12 +120,52 @@ async def lifespan(app: FastAPI):
     explainer_engine = None
 
 
+import logging
+
+logger = logging.getLogger("churn.api")
+
 app = FastAPI(
     title="Customer Churn Inference API",
     description="Enterprise-ready low-latency inference microservice for churn prediction, SHAP explainability, and automated retention alerts.",
     version="1.0.0",
     lifespan=lifespan,
 )
+
+allowed_origins_raw = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:8501,http://127.0.0.1:8501,http://localhost:3000,http://127.0.0.1:3000",
+)
+allowed_origins = [orig.strip() for orig in allowed_origins_raw.split(",") if orig.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
+)
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Enforce strict baseline security headers across all responses."""
+    response: Response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """Prevent unhandled internal stack traces from leaking to clients."""
+    logger.exception("Unhandled server exception processing %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "An internal server error occurred while processing the request."},
+    )
+
 
 
 @app.get("/health", status_code=status.HTTP_200_OK, tags=["Monitoring"])
@@ -142,7 +186,12 @@ async def health_check():
     }
 
 
-@app.post("/predict", response_model=ChurnPredictionResponse, tags=["Inference"])
+@app.post(
+    "/predict",
+    response_model=ChurnPredictionResponse,
+    tags=["Inference"],
+    dependencies=[Depends(require_api_key), Depends(rate_limit(60))],
+)
 async def predict_single(customer: CustomerFeatures, background_tasks: BackgroundTasks):
     """
     Perform real-time churn prediction for an individual customer and dispatch non-blocking retention alerts.
@@ -199,7 +248,12 @@ async def predict_single(customer: CustomerFeatures, background_tasks: Backgroun
     )
 
 
-@app.post("/predict/batch", response_model=BatchPredictionResponse, tags=["Inference"])
+@app.post(
+    "/predict/batch",
+    response_model=BatchPredictionResponse,
+    tags=["Inference"],
+    dependencies=[Depends(require_api_key), Depends(rate_limit(60))],
+)
 async def predict_batch(batch: BatchCustomerInput, background_tasks: BackgroundTasks):
     """
     Perform high-throughput vectorized batch churn prediction and dispatch alerts for high-risk accounts.
@@ -262,7 +316,12 @@ async def predict_batch(batch: BatchCustomerInput, background_tasks: BackgroundT
     )
 
 
-@app.post("/explain", response_model=ExplanationResponse, tags=["Explainability"])
+@app.post(
+    "/explain",
+    response_model=ExplanationResponse,
+    tags=["Explainability"],
+    dependencies=[Depends(require_api_key), Depends(rate_limit(10))],
+)
 async def explain_customer(customer: CustomerFeatures):
     """
     Compute local SHAP attributions, feature-level drivers, and plain-English narrative.

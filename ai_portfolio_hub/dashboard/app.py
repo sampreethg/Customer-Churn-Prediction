@@ -12,6 +12,7 @@ import os
 import sys
 import time
 from pathlib import Path
+
 import requests
 import streamlit as st
 
@@ -20,7 +21,6 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from dashboard.components import render_metric_card
 from dashboard.tabs.tab_nlp import render_tab_nlp
 from dashboard.tabs.tab_rag import render_rag_tab
 from dashboard.tabs.tab_rl import render_tab_rl
@@ -30,7 +30,7 @@ from dashboard.tabs.tab_vision import render_tab_vision
 # Streamlit Page Setup
 st.set_page_config(
     page_title="Unified AI Portfolio Showcase Hub",
-    page_icon="🧠",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -76,7 +76,7 @@ with st.sidebar:
         "https://raw.githubusercontent.com/pytorch/pytorch/master/docs/source/_static/img/pytorch-logo-dark.svg",
         width=130,
     )
-    st.markdown("### 🌐 Portfolio Architecture Hub")
+    st.markdown("### Portfolio Architecture Hub")
     st.markdown(
         """
         Consolidating 4 Production AI Domains into a Unified Asynchronous Gateway:
@@ -87,7 +87,7 @@ with st.sidebar:
         """
     )
     st.markdown("---")
-    st.markdown("### ⚙️ Gateway Settings")
+    st.markdown("### Gateway Settings")
     api_base_url = st.text_input(
         "FastAPI Gateway URL",
         value=os.getenv("API_BASE_URL", "http://localhost:8000"),
@@ -114,7 +114,7 @@ with st.sidebar:
         lat = 0.0
 
     st.markdown("---")
-    st.markdown("### 📡 System Telemetry")
+    st.markdown("### System Telemetry")
     status_class = "badge-healthy" if gateway_status == "healthy" else "badge-degraded"
     st.markdown(
         f"""
@@ -127,7 +127,7 @@ with st.sidebar:
     )
 
 # Main Application Header
-st.markdown('<div class="hub-title">🧠 Unified Multi-Domain AI Portfolio Hub</div>', unsafe_allow_html=True)
+st.markdown('<div class="hub-title"> Unified Multi-Domain AI Portfolio Hub</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="hub-subtitle">Production-grade microservice architecture serving Tabular Intelligence, Computer Vision with Grad-CAM, '
     'Transformer NLP, and Deep Reinforcement Learning.</div>',
@@ -136,11 +136,11 @@ st.markdown(
 
 # Tabs Navigation
 tab_labels = [
-    "📊 1. Tabular Churn (SHAP)",
-    "🖼️ 2. Computer Vision (Grad-CAM)",
-    "💬 3. Transformer NLP (DistilBERT)",
-    "🕹️ 4. Reinforcement Learning (D3QN)",
-    "📚 5. Generative AI (RAG)",
+    " 1. Tabular Churn (SHAP)",
+    " 2. Computer Vision (Grad-CAM)",
+    " 3. Transformer NLP (DistilBERT)",
+    " 4. Reinforcement Learning (D3QN)",
+    " 5. Generative AI (RAG)",
 ]
 t1, t2, t3, t4, t5 = st.tabs(tab_labels)
 

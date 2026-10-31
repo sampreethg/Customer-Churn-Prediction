@@ -10,12 +10,17 @@ Sends concurrent structured payloads across all four live gateway endpoints:
 import argparse
 import base64
 import io
+import os
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import httpx
 import numpy as np
 from PIL import Image
+
+API_KEY = os.getenv("API_KEY", "dev-secret-key-2026")
+AUTH_HEADERS = {"X-API-Key": API_KEY}
 
 # Terminal ANSI Colors
 GREEN = "\033[92m"
@@ -40,15 +45,15 @@ def test_health(base_url: str) -> bool:
             resp = client.get(f"{base_url}/health")
             latency = (time.perf_counter() - start) * 1000
             if resp.status_code != 200:
-                print(f"  {RED}FAIL{RESET}: /health returned HTTP {resp.status_code}")
+                print(f" {RED}FAIL{RESET}: /health returned HTTP {resp.status_code}")
                 return False
             data = resp.json()
-            print(f"  {GREEN}PASS{RESET} (Latency: {latency:.1f}ms)")
-            print(f"        Status: {data.get('status')} | Device: {data.get('device')}")
-            print(f"        Models: {data.get('models_loaded')}")
+            print(f" {GREEN}PASS{RESET} (Latency: {latency:.1f}ms)")
+            print(f" Status: {data.get('status')} | Device: {data.get('device')}")
+            print(f" Models: {data.get('models_loaded')}")
             return True
     except Exception as exc:
-        print(f"  {RED}ERROR{RESET}: Health check failed with error: {exc}")
+        print(f" {RED}ERROR{RESET}: Health check failed with error: {exc}")
         return False
 
 
@@ -65,7 +70,7 @@ def test_tabular(base_url: str) -> dict:
         "PaperlessBilling": "Yes",
     }
     with httpx.Client(timeout=15.0) as client:
-        resp = client.post(f"{base_url}/api/v1/tabular/predict", json=payload)
+        resp = client.post(f"{base_url}/api/v1/tabular/predict", json=payload, headers=AUTH_HEADERS)
         latency = (time.perf_counter() - start) * 1000
 
         assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
@@ -96,7 +101,7 @@ def test_vision(base_url: str) -> dict:
 
     files = {"file": ("synthetic_sample.png", buf, "image/png")}
     with httpx.Client(timeout=20.0) as client:
-        resp = client.post(f"{base_url}/api/v1/vision/classify", files=files)
+        resp = client.post(f"{base_url}/api/v1/vision/classify", files=files, headers=AUTH_HEADERS)
         latency = (time.perf_counter() - start) * 1000
 
         assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
@@ -126,11 +131,11 @@ def test_vision(base_url: str) -> dict:
 def test_nlp(base_url: str) -> dict:
     start = time.perf_counter()
     payload = {
-        "text": "The platform analytics and real-time dashboard are extraordinarily intuitive, highly responsive, and robust!",
+        "text": "The platform analytics and real-time dashboard are extraordinarily intuitive, highly responsive, and reliable.",
         "confidence_threshold": 0.5,
     }
     with httpx.Client(timeout=15.0) as client:
-        resp = client.post(f"{base_url}/api/v1/nlp/analyze", json=payload)
+        resp = client.post(f"{base_url}/api/v1/nlp/analyze", json=payload, headers=AUTH_HEADERS)
         latency = (time.perf_counter() - start) * 1000
 
         assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
@@ -158,7 +163,7 @@ def test_rl(base_url: str) -> dict:
         "seed": 42,
     }
     with httpx.Client(timeout=25.0) as client:
-        resp = client.post(f"{base_url}/api/v1/rl/playback", json=payload)
+        resp = client.post(f"{base_url}/api/v1/rl/playback", json=payload, headers=AUTH_HEADERS)
         latency = (time.perf_counter() - start) * 1000
 
         assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
@@ -214,15 +219,15 @@ def run_concurrent_smoke_test(base_url: str) -> bool:
 
     print_header("EXECUTION SUMMARY & VERIFICATION RESULTS")
     all_passed = True
-    for domain, (fn, _) in tasks.items():
+    for domain, (_fn, _) in tasks.items():
         if domain in results:
             r = results[domain]
             print(f"[{GREEN}PASS{RESET}] {BOLD}{domain:<24}{RESET} -> {r['endpoint']}")
-            print(f"       Latency: {r['latency_ms']:.1f}ms | {r['details']}")
+            print(f" Latency: {r['latency_ms']:.1f}ms | {r['details']}")
         else:
             all_passed = False
             print(f"[{RED}FAIL{RESET}] {BOLD}{domain:<24}{RESET}")
-            print(f"       Error: {errors.get(domain, 'Unknown error')}")
+            print(f" Error: {errors.get(domain, 'Unknown error')}")
 
     print(f"\n{BOLD}Total Concurrent Roundtrip Time:{RESET} {total_duration:.1f}ms")
 

@@ -6,9 +6,10 @@ stratified train/validation splitting, one-hot encoding, and data augmentation l
 """
 
 from typing import Tuple
+
 import numpy as np
-from sklearn.model_selection import train_test_split
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
 from tensorflow.keras import layers
 
 from .config import (
@@ -71,6 +72,7 @@ def load_and_preprocess_data(
     y_train_flat = y_train_raw.flatten()
     y_test_ints = y_test_raw.flatten()
 
+    x_test = x_test_norm
     import os
     sample_limit = os.getenv("SAMPLE_LIMIT")
     if sample_limit:
@@ -78,7 +80,7 @@ def load_and_preprocess_data(
         x_train_norm = x_train_norm[:limit]
         y_train_flat = y_train_flat[:limit]
         test_limit = max(100, limit // 5)
-        x_test_norm = x_test_norm[:test_limit]
+        x_test = x_test[:test_limit]
         y_test_ints = y_test_ints[:test_limit]
 
     # Stratified train/val split on raw integer labels
@@ -95,12 +97,12 @@ def load_and_preprocess_data(
     y_val = tf.keras.utils.to_categorical(y_val_ints, num_classes=NUM_CLASSES)
     y_test = tf.keras.utils.to_categorical(y_test_ints, num_classes=NUM_CLASSES)
 
-    print(f"Data ingestion complete:")
-    print(f"  Training samples:   {x_train.shape[0]} images | shape: {x_train.shape}")
-    print(f"  Validation samples: {x_val.shape[0]} images | shape: {x_val.shape}")
-    print(f"  Testing samples:    {x_test.shape[0]} images | shape: {x_test.shape}")
-    print(f"  Pixel range:        [{x_train.min():.1f}, {x_train.max():.1f}]")
-    print(f"  Target shape:       {y_train.shape} (One-Hot Encoded)")
+    print("Data ingestion complete:")
+    print(f" Training samples: {x_train.shape[0]} images | shape: {x_train.shape}")
+    print(f" Validation samples: {x_val.shape[0]} images | shape: {x_val.shape}")
+    print(f" Testing samples: {x_test.shape[0]} images | shape: {x_test.shape}")
+    print(f" Pixel range: [{x_train.min():.1f}, {x_train.max():.1f}]")
+    print(f" Target shape: {y_train.shape} (One-Hot Encoded)")
 
     return (x_train, y_train), (x_val, y_val), (x_test, y_test)
 

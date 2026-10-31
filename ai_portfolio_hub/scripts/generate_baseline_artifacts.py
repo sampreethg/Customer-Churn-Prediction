@@ -3,15 +3,16 @@
 Generates and serializes functional lightweight models for all 4 domains.
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
+
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 # Model Output Directories
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,7 +66,7 @@ def build_tabular_churn_artifact():
 
   out_path = MODELS_DIR / "best_churn_model.joblib"
   joblib.dump(clf, out_path)
-  print(f"      Saved: {out_path}")
+  print(f" Saved: {out_path}")
 
 
 def build_vision_cnn_artifact():
@@ -113,7 +114,7 @@ def build_vision_cnn_artifact():
 
   out_path = MODELS_DIR / "best_cnn_model.keras"
   model.save(out_path)
-  print(f"      Saved: {out_path}")
+  print(f" Saved: {out_path}")
 
 
 def build_transformer_nlp_artifact():
@@ -148,7 +149,7 @@ def build_transformer_nlp_artifact():
   # Save local weights & tokenizer vocabulary
   model.save_pretrained(nlp_dir)
   tokenizer.save_pretrained(nlp_dir)
-  print(f"      Saved: {nlp_dir}")
+  print(f" Saved: {nlp_dir}")
 
 
 def build_per_d3qn_artifact():
@@ -194,7 +195,7 @@ def build_per_d3qn_artifact():
 
   out_path = MODELS_DIR / "best_per_d3qn.pt"
   torch.save(model.state_dict(), out_path)
-  print(f"      Saved: {out_path}")
+  print(f" Saved: {out_path}")
 
 
 if __name__ == "__main__":

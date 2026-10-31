@@ -5,9 +5,10 @@ Combines Dueling network function approximation with decoupled Double DQN target
 and Polyak target network exponential smoothing.
 """
 
-from pathlib import Path
 import random
+from pathlib import Path
 from typing import Optional
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -161,7 +162,7 @@ class D3QNAgent:
         theta^- <- tau * theta + (1 - tau) * theta^-
         """
         for target_param, policy_param in zip(
-            self.target_net.parameters(), self.policy_net.parameters()
+            self.target_net.parameters(), self.policy_net.parameters(), strict=False
         ):
             target_param.data.copy_(
                 self.tau * policy_param.data + (1.0 - self.tau) * target_param.data
@@ -178,7 +179,7 @@ class D3QNAgent:
         """
         Load policy network state dict and synchronize target network.
         """
-        state_dict = torch.load(filepath, map_location=self.device)
+        state_dict = torch.load(filepath, map_location=self.device, weights_only=True)
         self.policy_net.load_state_dict(state_dict)
         self.target_net.load_state_dict(state_dict)
         self.policy_net.eval()

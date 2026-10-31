@@ -15,7 +15,7 @@ The platform provides an asynchronous **FastAPI** gateway microservice, an inter
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```text
                            [ INGRESS CLIENTS ]
@@ -23,57 +23,57 @@ The platform provides an asynchronous **FastAPI** gateway microservice, an inter
                                    |
                                    v
              +-----------------------------------------------+
-             |       Streamlit Unified Multi-Page Hub        |
-             |             (Port 8501: UI Layer)             |
+             | Streamlit Unified Multi-Page Hub |
+             | (Port 8501: UI Layer) |
              +-----------------------------------------------+
                                    |
                                    | HTTP / JSON / Multipart
                                    v
 +---------------------------------------------------------------------------------------+
-|                         FastAPI Asynchronous Gateway Service                          |
-|                              (Port 8000: Gateway Core)                                |
-|  +---------------------------------------------------------------------------------+  |
-|  | Lifespan Preloader: Tabular Model | CNN Model | DistilBERT Pipeline | D3QN Net  |  |
-|  +---------------------------------------------------------------------------------+  |
+| FastAPI Asynchronous Gateway Service |
+| (Port 8000: Gateway Core) |
+| +---------------------------------------------------------------------------------+ |
+| | Lifespan Preloader: Tabular Model | CNN Model | DistilBERT Pipeline | D3QN Net | |
+| +---------------------------------------------------------------------------------+ |
 +---------------------------------------------------------------------------------------+
-        |                    |                    |                    |
-        v                    v                    v                    v
- [ /api/v1/tabular ]  [ /api/v1/vision ]    [ /api/v1/nlp ]       [ /api/v1/rl ]
-        |                    |                    |                    |
-        v                    v                    v                    v
- +---------------+    +---------------+    +---------------+    +---------------+
- | Scikit-Learn  |    |  TensorFlow   |    | DistilBERT /  |    | PyTorch D3QN  |
- |   Pipeline    |    |   Keras CNN   |    | ONNX Runtime  |    | (CartPole-v1) |
- |---------------|    |---------------|    |---------------|    |---------------|
- | • Scaler/OHE  |    | • Conv2D/Pool |    | • HuggingFace |    | • SumTree PER |
- | • Cost Tuned  |    | • Batch Norm  |    | • FP32 / INT8 |    | • Double DQN  |
- | • Tree SHAP   |    | • Grad-CAM    |    | • Cross-Attn  |    | • Dueling V/A |
- +---------------+    +---------------+    +---------------+    +---------------+
-        \                    /                    \                    /
-         \                  /                      \                  /
-          v                v                        v                v
- +------------------------------------+    +-------------------------------+
- |    Domain 5: Production RAG Hub    |    |   Continuous Deep RL (SAC)    |
- |------------------------------------|    |-------------------------------|
- | • Bi-Encoder: all-MiniLM-L6-v2     |    | • Maximum Entropy Objective   |
- | • Vector Store: FAISS IndexFlatIP  |    | • Clipped Twin Critics        |
- | • Cross-Encoder: ms-marco-MiniLM   |    | • Squashed Gaussian Policy    |
- | • Context Grounding & Citations    |    | • Auto Temperature Alpha      |
- +------------------------------------+    +-------------------------------+
-                   \                              /
-                    \                            /
-                     v                          v
+        | | | |
+        v v v v
+ [ /api/v1/tabular ] [ /api/v1/vision ] [ /api/v1/nlp ] [ /api/v1/rl ]
+        | | | |
+        v v v v
+ +---------------+ +---------------+ +---------------+ +---------------+
+ | Scikit-Learn | | TensorFlow | | DistilBERT / | | PyTorch D3QN |
+ | Pipeline | | Keras CNN | | ONNX Runtime | | (CartPole-v1) |
+ |---------------| |---------------| |---------------| |---------------|
+ | • Scaler/OHE | | • Conv2D/Pool | | • HuggingFace | | • SumTree PER |
+ | • Cost Tuned | | • Batch Norm | | • FP32 / INT8 | | • Double DQN |
+ | • Tree SHAP | | • Grad-CAM | | • Cross-Attn | | • Dueling V/A |
+ +---------------+ +---------------+ +---------------+ +---------------+
+        \ / \ /
+         \ / \ /
+          v v v v
+ +------------------------------------+ +-------------------------------+
+ | Domain 5: Production RAG Hub | | Continuous Deep RL (SAC) |
+ |------------------------------------| |-------------------------------|
+ | • Bi-Encoder: all-MiniLM-L6-v2 | | • Maximum Entropy Objective |
+ | • Vector Store: FAISS IndexFlatIP | | • Clipped Twin Critics |
+ | • Cross-Encoder: ms-marco-MiniLM | | • Squashed Gaussian Policy |
+ | • Context Grounding & Citations | | • Auto Temperature Alpha |
+ +------------------------------------+ +-------------------------------+
+                   \ /
+                    \ /
+                     v v
 +---------------------------------------------------------------------------------------+
-|                   Continuous Observability & Hardware Optimization                    |
-| • Evidently AI Drift Engine (Kolmogorov-Smirnov & Population Stability Index)         |
-| • ONNX Runtime INT8 Post-Training Quantization (PTQ) Engine                           |
-| • Asynchronous Pytest & HTTPX Non-Blocking Smoke-Test Suite                           |
+| Continuous Observability & Hardware Optimization |
+| • Evidently AI Drift Engine (Kolmogorov-Smirnov & Population Stability Index) |
+| • ONNX Runtime INT8 Post-Training Quantization (PTQ) Engine |
+| • Asynchronous Pytest & HTTPX Non-Blocking Smoke-Test Suite |
 +---------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 🚀 Key Architectural Pillars & Technical Implementations
+## Key Architectural Pillars & Technical Implementations
 
 ### 1. Tabular Machine Learning & Cost-Sensitive MLOps
 * **Leak-Free Pipelines:** Strict segregation of fit/transform states using Scikit-Learn `ColumnTransformer` (`StandardScaler` + `OneHotEncoder` with `handle_unknown='ignore'`).
@@ -107,7 +107,7 @@ The platform provides an asynchronous **FastAPI** gateway microservice, an inter
 
 ---
 
-## 🛠️ CLI Verification Guide
+## CLI Verification Guide
 
 ```bash
 # 1. Automated Baseline Artifact Generation
@@ -125,3 +125,29 @@ python3 mlops/drift_monitor.py
 # 5. Run All Evaluations
 ./run_all_evaluations.sh
 ```
+
+---
+
+## Security Architecture
+
+The portfolio hub enforces defense-in-depth security hardening across all model inference, execution, serialization, and notification pipelines:
+
+* **Tiered Asynchronous Rate Limiting:** An `asyncio.Lock`-synchronized sliding-window in-memory rate limiter protects compute-intensive endpoints against resource exhaustion and denial-of-service (DoS) bursts:
+  - `/api/v1/tabular/predict` & `/api/v1/tabular/explain`: **10-60 req/min** per client IP.
+  - `/api/v1/vision/classify` (CNN + Grad-CAM saliency mapping): **15 req/min** per client IP.
+  - `/api/v1/rl/playback` (Gym CartPole simulation rollout): **10 req/min** per client IP.
+  - `/api/v1/rag/ingest` & `/api/v1/rag/index-docs` (vector indexing): **5 req/min** per client IP.
+  - Returns `HTTP 429 Too Many Requests` with dynamic `Retry-After` header. Features proxy-aware IP extraction (`X-Forwarded-For` with `TRUST_PROXIES` gating) and background stale-bucket memory pruning.
+* **Unified Authentication Middleware:** Constant-time API Key (`X-API-Key`) and Bearer token (`Authorization: Bearer <token>`) security dependency guards all domain inference and indexing endpoints via `secrets.compare_digest` to prevent timing attacks. Container orchestration and observability probes (`/health`, `/ready`, `/docs`, `/openapi.json`) remain unauthenticated for zero-friction readiness checks.
+* **Zero-Trust Webhook Egress (SSRF Defense):** Outbound notification pipelines enforce strict HTTPS-only transport, configurable destination domain allowlists (`WEBHOOK_ALLOWED_DOMAINS`, defaulting to `hooks.slack.com`, `discord.com`, `api.crm.example.com`), and pre-dispatch DNS resolution blocking private subnets (RFC 1918 `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), loopback (`127.0.0.0/8`), link-local metadata services (`169.254.169.254`), and IPv6 non-global addresses.
+* **Safe Weight Deserialization:** Complete elimination of arbitrary Python pickle deserialization and remote code execution (RCE) vectors by enforcing `weights_only=True` across all `torch.load()` call sites in model runtime, optimization, and reinforcement learning agents.
+* **Automated Security Verification:** Dedicated regression test suite (`tests/test_security_remediation.py`) verifying all 11 security attack vectors with a 100% test pass rate across 68 automated test cases.
+
+---
+
+## Engineering Credits & Contributors
+
+* **Sampreeth G**
+  - **Role:** ML Systems & Application Security Architect
+  - **Contributions:** Architected and implemented the tiered in-memory rate limiting engine, constant-time API key and bearer token security dependencies, outbound SSRF validation pipeline, PyTorch deserialization hardening (`weights_only=True`), and the automated security regression test suite.
+

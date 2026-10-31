@@ -9,11 +9,12 @@ Provides reusable utilities for the Streamlit Computer Vision dashboard:
 """
 
 from typing import Dict, List, Optional, Tuple
+
 import cv2
 import numpy as np
-from PIL import Image
 import plotly.graph_objects as go
 import tensorflow as tf
+from PIL import Image
 
 
 def preprocess_image(
@@ -178,7 +179,7 @@ def build_probability_chart(
     # Color palette: highlight top rank in vivid cobalt blue, others in softer slate blue
     colors = ["#3b82f6"] * len(probs)
     if len(colors) > 0:
-        colors[-1] = "#1d4ed8"  # Highest rank at top
+        colors[-1] = "#1d4ed8" # Highest rank at top
 
     fig = go.Figure(
         go.Bar(

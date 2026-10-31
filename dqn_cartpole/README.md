@@ -47,7 +47,7 @@ $$y_j = r_j + (1 - d_j) \cdot \gamma \cdot \max_{a'} Q(s'_j, a'; \theta^-)$$
 2. **Polyak Soft Update (Exponential Smoothing)**: After every gradient step, parameters are smoothly interpolated:
    $$\theta^- \leftarrow \tau \theta + (1 - \tau) \theta^- \quad (\tau = 0.005)$$
 
-### Loss Function & Robust Optimization
+### Loss Function & Huber Loss Optimization
 To prevent gradient explosion from large temporal difference (TD) errors $\delta = Q(s, a; \theta) - y$, we use the **Huber Loss (Smooth L1)**:
 
 $$L(\delta) = \begin{cases} 
@@ -63,25 +63,25 @@ Optimization is performed using `torch.optim.AdamW(lr=1e-3, amsgrad=True)` with 
 
 ```
 State Input s in R^4 [x, x_dot, theta, theta_dot]
-                │
-                ▼
-┌──────────────────────────────────────────────┐
-│ Linear (4 -> 128) -> He Normal Init          │
-│ Activation: ReLU                             │
-└──────────────────────────────────────────────┘
-                │
-                ▼
-┌──────────────────────────────────────────────┐
-│ Linear (128 -> 128) -> He Normal Init        │
-│ Activation: ReLU                             │
-└──────────────────────────────────────────────┘
-                │
-                ▼
-┌──────────────────────────────────────────────┐
-│ Linear (128 -> 2) -> Xavier Uniform Init     │
-└──────────────────────────────────────────────┘
-                │
-                ▼
+                
+                
+
+ Linear (4 -> 128) -> He Normal Init 
+ Activation: ReLU 
+
+                
+                
+
+ Linear (128 -> 128) -> He Normal Init 
+ Activation: ReLU 
+
+                
+                
+
+ Linear (128 -> 2) -> Xavier Uniform Init 
+
+                
+                
 Action Values: [ Q(s, a=0), Q(s, a=1) ]
 ```
 
@@ -91,27 +91,27 @@ Action Values: [ Q(s, a=0), Q(s, a=1) ]
 
 ```
 dqn_cartpole/
-├── src/
-│   ├── __init__.py           # Package initializer
-│   ├── config.py             # Hyperparameters, environment dimensions, filepaths
-│   ├── model.py              # PyTorch DQN neural network architecture
-│   ├── replay_buffer.py      # Transition dataclass and bounded Experience Replay Buffer
-│   ├── agent.py              # DQNAgent class (epsilon-greedy, replay, Bellman updates)
-│   ├── train.py              # Training loop, target sync, reward tracking, checkpointing
-│   └── visualize.py          # Learning curve visualization and 100-episode moving average
-├── scripts/
-│   └── evaluate_agent.py     # Deterministic evaluation trials with performance summaries
-├── tests/
-│   ├── __init__.py           # Test package initializer
-│   ├── test_replay_buffer.py # Capacity boundaries, FIFO eviction, sampling tensor types
-│   └── test_model.py         # Forward pass shapes, gradient propagation, and initialization
-├── models/
-│   └── best_dqn_cartpole.pt  # Saved optimal PyTorch policy network weights
-├── artifacts/
-│   └── learning_curve.png    # 600-dpi convergence plot against 475-point benchmark
-├── main.py                   # Orchestration pipeline (Train -> Verify Solved -> Evaluate)
-├── requirements.txt          # Production dependencies
-└── README.md                 # Mathematical formulation and operational instructions
+ src/
+ __init__.py # Package initializer
+ config.py # Hyperparameters, environment dimensions, filepaths
+ model.py # PyTorch DQN neural network architecture
+ replay_buffer.py # Transition dataclass and bounded Experience Replay Buffer
+ agent.py # DQNAgent class (epsilon-greedy, replay, Bellman updates)
+ train.py # Training loop, target sync, reward tracking, checkpointing
+ visualize.py # Learning curve visualization and 100-episode moving average
+ scripts/
+ evaluate_agent.py # Deterministic evaluation trials with performance summaries
+ tests/
+ __init__.py # Test package initializer
+ test_replay_buffer.py # Capacity boundaries, FIFO eviction, sampling tensor types
+ test_model.py # Forward pass shapes, gradient propagation, and initialization
+ models/
+ best_dqn_cartpole.pt # Saved optimal PyTorch policy network weights
+ artifacts/
+ learning_curve.png # 600-dpi convergence plot against 475-point benchmark
+ main.py # Orchestration pipeline (Train -> Verify Solved -> Evaluate)
+ requirements.txt # Production dependencies
+ README.md # Mathematical formulation and operational instructions
 ```
 
 ---

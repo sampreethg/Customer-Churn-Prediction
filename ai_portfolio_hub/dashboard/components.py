@@ -3,6 +3,7 @@ Shared UI Components, Visual Cards, and Plotly Chart Builders for Streamlit Hub.
 """
 
 from typing import Dict, List
+
 import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
@@ -42,9 +43,9 @@ def build_gauge_chart(probability: float, title: str = "Churn Risk Probability")
                 "borderwidth": 1,
                 "bordercolor": "#cbd5e1",
                 "steps": [
-                    {"range": [0, 35], "color": "#dcfce7"},     # Low (Green)
-                    {"range": [35, 70], "color": "#fef9c3"},    # Moderate (Yellow)
-                    {"range": [70, 100], "color": "#fee2e2"},   # High (Red)
+                    {"range": [0, 35], "color": "#dcfce7"}, # Low (Green)
+                    {"range": [35, 70], "color": "#fef9c3"}, # Moderate (Yellow)
+                    {"range": [70, 100], "color": "#fee2e2"}, # High (Red)
                 ],
                 "threshold": {
                     "line": {"color": "#dc2626", "width": 4},
@@ -66,7 +67,7 @@ def build_gauge_chart(probability: float, title: str = "Churn Risk Probability")
 def build_shap_bar_chart(shap_values: Dict[str, float]) -> go.Figure:
     """Horizontal bar chart for local SHAP feature attributions."""
     sorted_items = sorted(shap_values.items(), key=lambda x: abs(x[1]), reverse=True)[:8]
-    sorted_items.reverse()  # Ascending for bottom-to-top rendering
+    sorted_items.reverse() # Ascending for bottom-to-top rendering
 
     features = [item[0] for item in sorted_items]
     values = [item[1] for item in sorted_items]
@@ -105,7 +106,7 @@ def build_probability_bar_chart(predictions: List[Dict], title: str = "Probabili
 
     colors = ["#93c5fd"] * len(probs)
     if colors:
-        colors[-1] = "#2563eb"  # Highest probability in dark cobalt
+        colors[-1] = "#2563eb" # Highest probability in dark cobalt
 
     fig = go.Figure(
         go.Bar(
@@ -132,7 +133,7 @@ def build_cartpole_trajectory_chart(state_history: List[List[float]], q_history:
     """Multi-trace chart showing Cart Position, Pole Angle, and Q-values across timesteps."""
     steps = list(range(len(state_history)))
     cart_pos = [s[0] for s in state_history]
-    pole_angle = [np.degrees(s[2]) for s in state_history]  # Convert radians to degrees
+    pole_angle = [np.degrees(s[2]) for s in state_history] # Convert radians to degrees
     q_left = [q[0] for q in q_history]
     q_right = [q[1] for q in q_history]
 

@@ -5,10 +5,10 @@ Endpoints:
 - POST /api/v1/tabular/predict: Computes churn probability, risk tier, action, and local SHAP attributions.
 """
 
-from typing import Any, Dict
-from fastapi import APIRouter, HTTPException, Request, status
-import numpy as np
+from typing import Dict
+
 import pandas as pd
+from fastapi import APIRouter, HTTPException, Request, status
 
 from ..schemas import TabularInput, TabularOutput
 

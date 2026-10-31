@@ -41,27 +41,27 @@ $$\theta^- \leftarrow \tau \theta + (1 - \tau) \theta^- \quad (\tau = 0.005)$$
 
 ```
 Continuous State Observation s in R^4 [x, x_dot, theta, theta_dot]
-                        │
-                        ▼
-┌──────────────────────────────────────────────────────────────┐
-│ Shared Feature Trunk: Linear (4 -> 128) -> ReLU()            │
-└──────────────────────────────────────────────────────────────┘
-            │                                      │
-            ▼                                      ▼
-┌───────────────────────────────┐  ┌───────────────────────────┐
-│ State-Value Stream V(s)       │  │ Advantage Stream A(s, a)  │
-│ Linear(128 -> 64) -> ReLU()   │  │ Linear(128 -> 64) -> ReLU│
-│ Linear(64 -> 1)               │  │ Linear(64 -> 2)           │
-└───────────────────────────────┘  └───────────────────────────┘
-            │ [B, 1]                               │ [B, 2]
-            └───────────────────┬──────────────────┘
-                                ▼
-┌──────────────────────────────────────────────────────────────┐
-│ Identifiability Aggregation Layer:                           │
-│ Q(s, a) = V(s) + [ A(s, a) - 1/|A| * sum_{a'} A(s, a') ]     │
-└──────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
+                        
+                        
+
+ Shared Feature Trunk: Linear (4 -> 128) -> ReLU() 
+
+             
+             
+ 
+ State-Value Stream V(s) Advantage Stream A(s, a) 
+ Linear(128 -> 64) -> ReLU() Linear(128 -> 64) -> ReLU
+ Linear(64 -> 1) Linear(64 -> 2) 
+ 
+             [B, 1] [B, 2]
+            
+                                
+
+ Identifiability Aggregation Layer: 
+ Q(s, a) = V(s) + [ A(s, a) - 1/|A| * sum_{a'} A(s, a') ] 
+
+                                
+                                
                   Action-Values Q(s, ·) in R^2
 ```
 
@@ -71,27 +71,27 @@ Continuous State Observation s in R^4 [x, x_dot, theta, theta_dot]
 
 ```
 d3qn_cartpole/
-├── src/
-│   ├── __init__.py           # Package initialization
-│   ├── config.py             # Hyperparameters (lr, gamma, tau, batch_size, buffer, epsilon)
-│   ├── model.py              # DuelingDQN architecture with mean-centered aggregation
-│   ├── replay_buffer.py      # Bounded experience replay buffer returning batched tensors
-│   ├── agent.py              # D3QNAgent (epsilon-greedy, Polyak soft update, DDQN target logic)
-│   ├── train.py              # Training loop, evaluation window tracker, checkpointing
-│   └── visualize.py          # Dual-axis learning curves (smoothed rewards, moving avg, epsilon)
-├── scripts/
-│   └── evaluate.py           # Deterministic policy evaluation running rendered test episodes
-├── tests/
-│   ├── __init__.py           # Test package initializer
-│   ├── test_dueling_math.py  # Unit tests verifying advantage mean-centering and stream shapes
-│   └── test_ddqn_targets.py  # Unit tests confirming selection/evaluation separation
-├── models/
-│   └── best_d3qn_cartpole.pt # Checkpointed best PyTorch weights
-├── artifacts/
-│   └── d3qn_learning_curve.png # High-resolution convergence plot against 490-point benchmark
-├── main.py                   # Orchestration entry point (train -> assert solved -> export plots)
-├── requirements.txt          # Production dependencies
-└── README.md                 # Complete mathematical formulation and run commands
+ src/
+ __init__.py # Package initialization
+ config.py # Hyperparameters (lr, gamma, tau, batch_size, buffer, epsilon)
+ model.py # DuelingDQN architecture with mean-centered aggregation
+ replay_buffer.py # Bounded experience replay buffer returning batched tensors
+ agent.py # D3QNAgent (epsilon-greedy, Polyak soft update, DDQN target logic)
+ train.py # Training loop, evaluation window tracker, checkpointing
+ visualize.py # Dual-axis learning curves (smoothed rewards, moving avg, epsilon)
+ scripts/
+ evaluate.py # Deterministic policy evaluation running rendered test episodes
+ tests/
+ __init__.py # Test package initializer
+ test_dueling_math.py # Unit tests verifying advantage mean-centering and stream shapes
+ test_ddqn_targets.py # Unit tests confirming selection/evaluation separation
+ models/
+ best_d3qn_cartpole.pt # Checkpointed best PyTorch weights
+ artifacts/
+ d3qn_learning_curve.png # High-resolution convergence plot against 490-point benchmark
+ main.py # Orchestration entry point (train -> assert solved -> export plots)
+ requirements.txt # Production dependencies
+ README.md # Complete mathematical formulation and run commands
 ```
 
 ---

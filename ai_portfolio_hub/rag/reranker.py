@@ -4,7 +4,7 @@ Re-scores retrieved candidate chunks against the user query using joint cross-at
 to filter out false-positive semantic matches and surface high-precision contexts.
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class CrossEncoderReranker:
@@ -50,7 +50,7 @@ class CrossEncoderReranker:
                 scores.append(float(combined))
 
         reranked = []
-        for chunk, score in zip(candidates, scores):
+        for chunk, score in zip(candidates, scores, strict=False):
             item = dict(chunk)
             item["rerank_score"] = score
             if score >= threshold:

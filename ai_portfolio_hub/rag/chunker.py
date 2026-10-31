@@ -4,7 +4,7 @@ Splits documents cleanly along natural paragraph, sentence, and word boundaries
 while maintaining sliding-window overlap to prevent semantic fragmentation.
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class RecursiveCharacterChunker:
@@ -26,7 +26,7 @@ class RecursiveCharacterChunker:
             return []
 
         raw_chunks = self._recursive_split(text, self.separators)
-        
+
         # Merge small chunks to satisfy chunk_size while maintaining overlap
         merged_chunks = []
         current_chunk = []

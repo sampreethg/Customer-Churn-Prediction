@@ -6,20 +6,28 @@ multipart image classification returning top-k predictions, and on-demand Grad-C
 """
 
 import base64
-from contextlib import asynccontextmanager
 import io
+import logging
+import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
 import cv2
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from PIL import Image
 import numpy as np
 import tensorflow as tf
+from fastapi import FastAPI, File, HTTPException, Request, Response, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from PIL import Image
+from pydantic import BaseModel, Field
 
 from src.config import CLASS_NAMES, IMG_HEIGHT, IMG_WIDTH, MODEL_SAVE_PATH
 from src.explain import make_gradcam_heatmap, overlay_gradcam
+
+logger = logging.getLogger("vision.api")
+MAX_UPLOAD_SIZE_BYTES = int(os.getenv("MAX_UPLOAD_SIZE_MB", "10")) * 1024 * 1024
+ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
 
 # Global Model Container
 model_container: Dict[str, Any] = {"model": None}
@@ -35,14 +43,14 @@ def load_inference_model(model_path: Path = MODEL_SAVE_PATH) -> Optional[tf.kera
             print(f"[API] CNN Model loaded successfully from: {model_path.resolve()}")
             return model
         except Exception as exc:
-            print(f"[API ERROR] Failed to load model from {model_path}: {exc}")
+            logger.error("Failed to load model from %s: %s", model_path, exc)
 
     print(f"[API WARNING] Checkpoint not found at: {model_path.resolve()}. Initializing fresh CNN architecture.")
     try:
         from src.model import build_cnn_model
         return build_cnn_model()
     except Exception as exc:
-        print(f"[API ERROR] Failed to build fallback model: {exc}")
+        logger.error("Failed to build fallback model: %s", exc)
         return None
 
 
@@ -63,13 +71,41 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+allowed_origins_raw = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:8501,http://127.0.0.1:8501,http://localhost:3000,http://127.0.0.1:3000",
+)
+allowed_origins = [orig.strip() for orig in allowed_origins_raw.split(",") if orig.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Enforce baseline security headers."""
+    response: Response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """Prevent internal exception stack trace leakage."""
+    logger.exception("Unhandled server exception processing %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "An internal server error occurred while processing the image request."},
+    )
+
 
 
 # --- Response Schemas ---
@@ -169,11 +205,23 @@ async def classify_image(file: UploadFile = File(...)):
             detail="No filename provided in upload payload.",
         )
 
+    if file.content_type and file.content_type not in ALLOWED_IMAGE_MIMES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file type '{file.content_type}'. Allowed types: {', '.join(sorted(ALLOWED_IMAGE_MIMES))}",
+        )
+
     content = await file.read()
     if len(content) == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Uploaded file payload is empty.",
+        )
+
+    if len(content) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File size exceeds maximum allowed limit of {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB.",
         )
 
     batch_tensor, _ = preprocess_image_bytes(content)
@@ -222,7 +270,25 @@ async def explain_image(file: UploadFile = File(...)):
             detail="CNN model is not loaded. Train the model first.",
         )
 
+    if file.content_type and file.content_type not in ALLOWED_IMAGE_MIMES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file type '{file.content_type}'. Allowed types: {', '.join(sorted(ALLOWED_IMAGE_MIMES))}",
+        )
+
     content = await file.read()
+    if len(content) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file payload is empty.",
+        )
+
+    if len(content) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File size exceeds maximum allowed limit of {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB.",
+        )
+
     batch_tensor, display_img = preprocess_image_bytes(content)
 
     preds = model.predict(batch_tensor, verbose=0)[0]

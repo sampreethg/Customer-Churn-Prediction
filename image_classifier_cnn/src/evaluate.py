@@ -6,14 +6,22 @@ outputs detailed per-category metrics, and generates a labeled Confusion Matrix 
 """
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
+
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from sklearn.metrics import classification_report, confusion_matrix, f1_score, precision_score, recall_score
 import tensorflow as tf
+from sklearn.metrics import (
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+)
 
 from .config import CLASS_NAMES, CONFUSION_MATRIX_PATH
 
@@ -39,9 +47,6 @@ def plot_confusion_matrix(
         Filepath for saving PNG plot.
     """
     cm = confusion_matrix(y_true, y_pred)
-    # Normalized confusion matrix (percentages)
-    cm_norm = cm.astype("float") / (cm.sum(axis=1)[:, np.newaxis] + 1e-10)
-
     plt.figure(figsize=(10, 8))
     sns.heatmap(
         cm,
@@ -75,7 +80,7 @@ def evaluate_model(
     save_path: Path = CONFUSION_MATRIX_PATH,
 ) -> Dict[str, float]:
     """
-    Comprehensive evaluation of test data performance.
+    Evaluate model performance on test dataset.
 
     Parameters
     ----------
@@ -96,7 +101,7 @@ def evaluate_model(
         Dictionary with overall accuracy, macro precision, recall, and f1-score.
     """
     print("\n" + "=" * 60)
-    print("              STAGE: MODEL TEST EVALUATION")
+    print(" STAGE: MODEL TEST EVALUATION")
     print("=" * 60)
 
     # Convert one-hot to class indices if needed
@@ -116,10 +121,10 @@ def evaluate_model(
     f1 = float(f1_score(y_true, y_pred, average="macro", zero_division=0))
 
     print(f"\n[Overall Performance Metrics on Test Set ({len(y_true)} samples)]")
-    print(f"  Accuracy:        {acc * 100:.2f}%")
-    print(f"  Macro Precision: {prec:.4f}")
-    print(f"  Macro Recall:    {rec:.4f}")
-    print(f"  Macro F1-Score:  {f1:.4f}")
+    print(f" Accuracy: {acc * 100:.2f}%")
+    print(f" Macro Precision: {prec:.4f}")
+    print(f" Macro Recall: {rec:.4f}")
+    print(f" Macro F1-Score: {f1:.4f}")
 
     print("\n[Detailed Per-Category Classification Report]")
     report_str = classification_report(

@@ -7,16 +7,11 @@ Validates:
 - RL simulation episode limits and seed validation
 """
 
-import sys
-from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from api.schemas import (
+from ai_portfolio_hub.api.schemas import (
     ContractTypeEnum,
     NLPInput,
     PaymentMethodEnum,
@@ -38,14 +33,14 @@ def test_tabular_input_valid():
     )
     assert data.Tenure_Months == 14
     assert data.MonthlyCharges == 78.50
-    assert data.Age == 45  # Default value
+    assert data.Age == 45 # Default value
 
 
 def test_tabular_input_bounds_failure():
     """Verify negative charges or tenure > 120 trigger ValidationError."""
     with pytest.raises(ValidationError):
         TabularInput(
-            Tenure_Months=-5,  # Invalid
+            Tenure_Months=-5, # Invalid
             MonthlyCharges=78.50,
             TotalTickets=2,
             ContractType=ContractTypeEnum.month_to_month,
@@ -56,7 +51,7 @@ def test_tabular_input_bounds_failure():
     with pytest.raises(ValidationError):
         TabularInput(
             Tenure_Months=14,
-            MonthlyCharges=-10.0,  # Invalid
+            MonthlyCharges=-10.0, # Invalid
             TotalTickets=2,
             ContractType=ContractTypeEnum.month_to_month,
             TechSupport=TechSupportEnum.no,

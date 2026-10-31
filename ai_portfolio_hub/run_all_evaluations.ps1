@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "====================================================================" -ForegroundColor Cyan
-Write-Host "       AI Portfolio Hub: Master Verification & Benchmark Runner      " -ForegroundColor Cyan
+Write-Host " AI Portfolio Hub: Master Verification & Benchmark Runner " -ForegroundColor Cyan
 Write-Host "====================================================================" -ForegroundColor Cyan
 
 # 1. Dependency Validation
@@ -44,9 +44,9 @@ Write-Host "`n[Stage 5/5] Executing data drift and stability audit..." -Foregrou
 python mlops/drift_monitor.py
 
 Write-Host "`n====================================================================" -ForegroundColor Green
-Write-Host "       All System Pipelines Verified and Operational!               " -ForegroundColor Green
+Write-Host " All System Pipelines Verified and Operational! " -ForegroundColor Green
 Write-Host "====================================================================" -ForegroundColor Green
-Write-Host "- Streamlit UI:        http://localhost:8501" -ForegroundColor Cyan
-Write-Host "- Swagger OpenAPI:     http://localhost:8000/docs" -ForegroundColor Cyan
+Write-Host "- Streamlit UI: http://localhost:8501" -ForegroundColor Cyan
+Write-Host "- Swagger OpenAPI: http://localhost:8000/docs" -ForegroundColor Cyan
 Write-Host "- Latest Drift Report: artifacts/mlops/" -ForegroundColor Cyan
-Write-Host "- Optimized Weights:   models/optimized/distilbert_int8.pt`n" -ForegroundColor Cyan
+Write-Host "- Optimized Weights: models/optimized/distilbert_int8.pt`n" -ForegroundColor Cyan

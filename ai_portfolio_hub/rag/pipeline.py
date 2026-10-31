@@ -4,8 +4,9 @@ Combines document parsing, recursive sliding-window chunking, dense vector index
 cross-encoder re-ranking, and context-grounded response generation with strict citation tracking.
 """
 
-from typing import List, Dict, Any, Optional
 import time
+from typing import Any, Dict
+
 from .chunker import RecursiveCharacterChunker
 from .indexer import DenseVectorIndex
 from .reranker import CrossEncoderReranker

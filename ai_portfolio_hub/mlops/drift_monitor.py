@@ -4,10 +4,9 @@ Executes statistical drift tests across monitored features, checks K-S statistic
 and renders an HTML & JSON report saved under artifacts/mlops/.
 """
 
-import os
-import sys
 import time
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -19,7 +18,7 @@ ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 def generate_drift_audit():
     print("=" * 65)
-    print("      MLOps PRODUCTION COVARIATE SHIFT & DRIFT AUDIT")
+    print(" MLOps PRODUCTION COVARIATE SHIFT & DRIFT AUDIT")
     print("=" * 65)
 
     np.random.seed(42)
@@ -34,9 +33,9 @@ def generate_drift_audit():
 
     # Production inference window with simulated tenure/charges drift
     cur_df = pd.DataFrame({
-        "Tenure_Months": np.random.randint(1, 36, size=n_samples),  # drifted (younger tenure)
-        "MonthlyCharges": np.random.uniform(40.0, 140.0, size=n_samples),  # drifted (higher charges)
-        "TotalTickets": np.random.poisson(lam=1.6, size=n_samples),  # stable
+        "Tenure_Months": np.random.randint(1, 36, size=n_samples), # drifted (younger tenure)
+        "MonthlyCharges": np.random.uniform(40.0, 140.0, size=n_samples), # drifted (higher charges)
+        "TotalTickets": np.random.poisson(lam=1.6, size=n_samples), # stable
     })
 
     report_data = []

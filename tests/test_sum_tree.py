@@ -1,6 +1,5 @@
 """Mathematical Invariant and SumTree Priority Queue Property Tests for PER."""
 
-import pytest
 import numpy as np
 
 
@@ -66,7 +65,7 @@ def test_sum_tree_dynamic_update():
     assert abs(initial_root - 36.0) < 1e-5
 
     # Update leaf index 7 (first leaf is at 8 - 1 = 7)
-    tree.update(7, 10.0)  # was 1.0, now 10.0 (+9.0)
+    tree.update(7, 10.0) # was 1.0, now 10.0 (+9.0)
     assert abs(tree.total_priority - 45.0) < 1e-5
 
 

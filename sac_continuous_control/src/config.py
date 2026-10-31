@@ -13,7 +13,7 @@ class SACConfig:
     action_low: float = -2.0
     gamma: float = 0.99
     tau: float = 0.005
-    alpha: float = 0.2  # Initial entropy temperature
+    alpha: float = 0.2 # Initial entropy temperature
     auto_tune_alpha: bool = True
     lr_actor: float = 3e-4
     lr_critic: float = 3e-4

@@ -8,19 +8,19 @@ This repository provides an enterprise-ready, containerized deployment of the Cu
 
 ```
                       +---------------------------------------+
-                      |             Host Machine              |
+                      | Host Machine |
                       +---------------------------------------+
-                                  |                |
-                    Port 8501     |                |     Port 8000
-                    (Browser)     |                |     (REST / OpenAPI)
-                                  v                v
-                 +-------------------+          +-------------------+
-                 |  churn_dashboard  |          |     churn_api     |
-                 | (Streamlit: 8501) |          |  (FastAPI: 8000)  |
-                 |   User: dashuser  |          |   User: apiuser   |
-                 +-------------------+          +-------------------+
-                           |                              ^
-                           |   HTTP Requests via DNS      |
+                                  | |
+                    Port 8501 | | Port 8000
+                    (Browser) | | (REST / OpenAPI)
+                                  v v
+                 +-------------------+ +-------------------+
+                 | churn_dashboard | | churn_api |
+                 | (Streamlit: 8501) | | (FastAPI: 8000) |
+                 | User: dashuser | | User: apiuser |
+                 +-------------------+ +-------------------+
+                           | ^
+                           | HTTP Requests via DNS |
                            +------------------------------+
                                (http://api:8000)
                                         |
@@ -29,9 +29,9 @@ This repository provides an enterprise-ready, containerized deployment of the Cu
                  ===================================================
                                         |
                  +-------------------------------------------------+
-                 | Host Read-Only Volumes (:ro)                    |
-                 |  - ./models    -> /app/models:ro                |
-                 |  - ./artifacts -> /app/artifacts:ro             |
+                 | Host Read-Only Volumes (:ro) |
+                 | - ./models -> /app/models:ro |
+                 | - ./artifacts -> /app/artifacts:ro |
                  +-------------------------------------------------+
 ```
 
@@ -57,12 +57,12 @@ This repository provides an enterprise-ready, containerized deployment of the Cu
 
 ```
 churn_prediction/
-├── docker/
-│   ├── Dockerfile.api           # Slim container definition for FastAPI inference backend
-│   └── Dockerfile.dashboard     # Slim container definition for Streamlit UI dashboard
-├── docker-compose.yml           # Multi-service composition and orchestration manifest
-├── .dockerignore                # Build context exclusion rules
-└── README_DOCKER.md             # Docker lifecycle, management, and troubleshooting guide
+ docker/
+ Dockerfile.api # Slim container definition for FastAPI inference backend
+ Dockerfile.dashboard # Slim container definition for Streamlit UI dashboard
+ docker-compose.yml # Multi-service composition and orchestration manifest
+ .dockerignore # Build context exclusion rules
+ README_DOCKER.md # Docker lifecycle, management, and troubleshooting guide
 ```
 
 ---
@@ -95,9 +95,9 @@ docker compose ps
 ```
 *Expected Output:*
 ```
-NAME              IMAGE                            COMMAND                  SERVICE     CREATED          STATUS                    PORTS
-churn_api         customer-churn-prediction-api         "uvicorn api.app:app…"   api         30 seconds ago   Up 30 seconds (healthy)   0.0.0.0:8000->8000/tcp
-churn_dashboard   customer-churn-prediction-dashboard   "streamlit run dashb…"   dashboard   20 seconds ago   Up 20 seconds (healthy)   0.0.0.0:8501->8501/tcp
+NAME IMAGE COMMAND SERVICE CREATED STATUS PORTS
+churn_api customer-churn-prediction-api "uvicorn api.app:app…" api 30 seconds ago Up 30 seconds (healthy) 0.0.0.0:8000->8000/tcp
+churn_dashboard customer-churn-prediction-dashboard "streamlit run dashb…" dashboard 20 seconds ago Up 20 seconds (healthy) 0.0.0.0:8501->8501/tcp
 ```
 
 ### 3. Stream Live Aggregate Logs

@@ -105,21 +105,21 @@ def render_risk_card(risk_level: str, probability: float, recommendation: str) -
             "border_color": "#ef4444",
             "badge_bg": "#fee2e2",
             "badge_color": "#991b1b",
-            "icon": "⚠️",
+            "icon": "[Warning]",
             "title": "Immediate Churn Hazard",
         },
         "Medium": {
             "border_color": "#f59e0b",
             "badge_bg": "#fef3c7",
             "badge_color": "#92400e",
-            "icon": "⚡",
+            "icon": "",
             "title": "Moderate Attrition Risk",
         },
         "Low": {
             "border_color": "#10b981",
             "badge_bg": "#d1fae5",
             "badge_color": "#065f46",
-            "icon": "✅",
+            "icon": "[OK]",
             "title": "Healthy Account Engagement",
         },
     }
@@ -238,21 +238,21 @@ def render_batch_summary(df_results: pd.DataFrame) -> None:
         dist_cols = st.columns(3)
         with dist_cols[0]:
             st.info(
-                f"🔴 **High Risk:** {high_count} accounts ({high_count / total_accounts * 100:.1f}%)"
+                f"[High] **High Risk:** {high_count} accounts ({high_count / total_accounts * 100:.1f}%)"
                 if total_accounts > 0
-                else "🔴 High Risk: 0"
+                else "[High] High Risk: 0"
             )
         with dist_cols[1]:
             st.warning(
-                f"🟡 **Medium Risk:** {med_count} accounts ({med_count / total_accounts * 100:.1f}%)"
+                f"[Medium] **Medium Risk:** {med_count} accounts ({med_count / total_accounts * 100:.1f}%)"
                 if total_accounts > 0
-                else "🟡 Medium Risk: 0"
+                else "[Medium] Medium Risk: 0"
             )
         with dist_cols[2]:
             st.success(
-                f"🟢 **Low Risk:** {low_count} accounts ({low_count / total_accounts * 100:.1f}%)"
+                f"[Low] **Low Risk:** {low_count} accounts ({low_count / total_accounts * 100:.1f}%)"
                 if total_accounts > 0
-                else "🟢 Low Risk: 0"
+                else "[Low] Low Risk: 0"
             )
 
 
@@ -282,7 +282,7 @@ def render_shap_breakdown(explanation_data: dict, top_n: int = 8) -> None:
     plot_feats = sorted(all_features, key=lambda x: abs(x.get("shap_value", 0.0)), reverse=True)[
         :top_n
     ]
-    plot_feats = list(reversed(plot_feats))  # Ascending for horizontal bar
+    plot_feats = list(reversed(plot_feats)) # Ascending for horizontal bar
 
     names = [f["feature_name"] for f in plot_feats]
     shap_vals = [f["shap_value"] for f in plot_feats]
@@ -298,7 +298,7 @@ def render_shap_breakdown(explanation_data: dict, top_n: int = 8) -> None:
             border-radius: 6px;
             margin-bottom: 16px;
         ">
-            <span style="font-weight: 700; color: #1e3a8a; font-size: 0.95rem;">💡 Automated XAI Narrative:</span>
+            <span style="font-weight: 700; color: #1e3a8a; font-size: 0.95rem;">[Info] Automated XAI Narrative:</span>
             <p style="margin: 4px 0 0 0; color: #334155; font-size: 0.98rem; line-height: 1.45;">
                 {narrative}
             </p>
@@ -355,6 +355,6 @@ def render_shap_breakdown(explanation_data: dict, top_n: int = 8) -> None:
             val = f["shap_value"]
             fname = f["feature_name"]
             if val >= 0:
-                st.markdown(f"🔴 **{fname}**: `+{val:.4f}` *(increases churn risk)*")
+                st.markdown(f"[High] **{fname}**: `+{val:.4f}` *(increases churn risk)*")
             else:
-                st.markdown(f"🟢 **{fname}**: `{val:.4f}` *(reduces churn risk / loyalty signal)*")
+                st.markdown(f"[Low] **{fname}**: `{val:.4f}` *(reduces churn risk / loyalty signal)*")

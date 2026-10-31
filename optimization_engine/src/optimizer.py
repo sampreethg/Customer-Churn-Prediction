@@ -6,12 +6,13 @@ Accelerates production model deployments via:
 3. Latency profiling (P50, P95, P99) and memory compression benchmarking.
 """
 
-from typing import Dict, Any, Tuple, Callable
-import time
 import os
+import time
+from typing import Any, Callable, Dict
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 
 
 class InferenceOptimizer:

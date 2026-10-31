@@ -147,5 +147,5 @@ def test_client():
     """
     Provide a FastAPI TestClient with application lifespan context manager triggered.
     """
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-API-Key": "test-api-key"}) as client:
         yield client

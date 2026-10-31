@@ -8,6 +8,7 @@ rolling performance tracking, and automated checkpoint serialization when averag
 from collections import deque
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
 import gymnasium as gym
 import numpy as np
 import torch
@@ -77,15 +78,15 @@ def train_d3qn(
     is_solved = False
 
     print("\n" + "=" * 65)
-    print(f"        STARTING D3QN TRAINING: {env_id}")
+    print(f" STARTING D3QN TRAINING: {env_id}")
     print("=" * 65)
-    print(f"Max Episodes:      {max_episodes}")
-    print(f"Solved Threshold:  {solved_threshold} (over {eval_window} consecutive episodes)")
-    print(f"Replay Capacity:   {agent.memory.capacity}")
-    print(f"Batch Size:        {agent.batch_size}")
-    print(f"Discount (Gamma):  {agent.gamma}")
-    print(f"Target Update:     Polyak Soft (Tau={agent.tau})")
-    print(f"Compute Device:    {agent.device}\n")
+    print(f"Max Episodes: {max_episodes}")
+    print(f"Solved Threshold: {solved_threshold} (over {eval_window} consecutive episodes)")
+    print(f"Replay Capacity: {agent.memory.capacity}")
+    print(f"Batch Size: {agent.batch_size}")
+    print(f"Discount (Gamma): {agent.gamma}")
+    print(f"Target Update: Polyak Soft (Tau={agent.tau})")
+    print(f"Compute Device: {agent.device}\n")
 
     for episode in range(1, max_episodes + 1):
         state, _ = env.reset(seed=seed + episode)

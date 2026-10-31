@@ -5,10 +5,13 @@ Constructs rich Slack Block Kit, Discord embed, and generic CRM JSON payloads,
 and dispatches non-blocking notifications with exponential backoff retries.
 """
 
+import ipaddress
 import logging
 import os
+import socket
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from tenacity import (
@@ -17,6 +20,86 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
+
+DEFAULT_ALLOWED_DOMAINS = {"hooks.slack.com", "discord.com", "api.crm.example.com"}
+
+
+def get_allowed_webhook_domains() -> set[str]:
+    configured = os.getenv("WEBHOOK_ALLOWED_DOMAINS")
+    if configured:
+        return {d.strip().lower() for d in configured.split(",") if d.strip()}
+    return set(DEFAULT_ALLOWED_DOMAINS)
+
+
+def validate_webhook_url(url: str, allowed_domains: set[str] | None = None) -> None:
+    if not url:
+        raise ValueError("Webhook URL cannot be empty.")
+
+    parsed = urlparse(url)
+    if parsed.scheme.lower() != "https":
+        raise ValueError(
+            f"Invalid webhook URL scheme '{parsed.scheme}'. Only 'https' is permitted."
+        )
+
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError(f"Webhook URL '{url}' is missing a valid hostname.")
+
+    hostname_clean = hostname.strip().lower()
+
+    # Block direct IP literals if they are private/loopback/link-local/metadata
+    try:
+        direct_ip = ipaddress.ip_address(hostname_clean)
+        if (
+            direct_ip.is_private
+            or direct_ip.is_loopback
+            or direct_ip.is_link_local
+            or direct_ip.is_reserved
+            or direct_ip.is_multicast
+            or not direct_ip.is_global
+        ):
+            raise ValueError(
+                f"Webhook URL target '{hostname_clean}' is a forbidden non-global or private IP."
+            )
+    except ValueError as exc:
+        if "forbidden" in str(exc):
+            raise
+        # Not a raw IP literal, proceed to domain checking
+
+    domains = allowed_domains if allowed_domains is not None else get_allowed_webhook_domains()
+    if hostname_clean not in domains:
+        raise ValueError(
+            f"Webhook domain '{hostname_clean}' is not in the allowed domains: {sorted(list(domains))}"
+        )
+
+    # DNS resolution & IP check
+    try:
+        addr_info = socket.getaddrinfo(hostname_clean, 443)
+        for entry in addr_info:
+            ip_str = entry[4][0]
+            ip = ipaddress.ip_address(ip_str)
+            if (
+                ip.is_private
+                or ip.is_loopback
+                or ip.is_link_local
+                or ip.is_reserved
+                or ip.is_multicast
+                or not ip.is_global
+            ):
+                raise ValueError(
+                    f"Webhook domain '{hostname_clean}' resolved to forbidden private/local IP: {ip_str}"
+                )
+    except socket.gaierror as exc:
+        is_test_env = (
+            os.getenv("APP_ENV") == "test"
+            or os.getenv("TESTING") == "1"
+            or hostname_clean.endswith(".example.com")
+            or hostname_clean == "example.com"
+        )
+        if not is_test_env:
+            raise ValueError(
+                f"DNS resolution failed for webhook host '{hostname_clean}': {exc}"
+            ) from exc
 
 logger = logging.getLogger("retention.alerting")
 if not logger.handlers:
@@ -66,13 +149,13 @@ class AlertPayloadBuilder:
         )
 
         return {
-            "text": f"🚨 High Churn Risk Alert: Account {customer_id} ({pct_str})",
+            "text": f"[ALERT] High Churn Risk Alert: Account {customer_id} ({pct_str})",
             "blocks": [
                 {
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": f"🚨 High-Risk Churn Alert: {customer_id}",
+                        "text": f"[ALERT] High-Risk Churn Alert: {customer_id}",
                         "emoji": True,
                     },
                 },
@@ -82,7 +165,7 @@ class AlertPayloadBuilder:
                         {"type": "mrkdwn", "text": f"*Account ID:*\n`{customer_id}`"},
                         {
                             "type": "mrkdwn",
-                            "text": f"*Churn Probability:*\n🔴 *{pct_str}* ({risk_level} Risk)",
+                            "text": f"*Churn Probability:*\n[High] *{pct_str}* ({risk_level} Risk)",
                         },
                     ],
                 },
@@ -90,7 +173,7 @@ class AlertPayloadBuilder:
                     "type": "section",
                     "fields": [
                         {"type": "mrkdwn", "text": f"*Primary Hazard Drivers:*\n{factor_text}"},
-                        {"type": "mrkdwn", "text": f"*Recommended Playbook:*\n👉 _{action}_"},
+                        {"type": "mrkdwn", "text": f"*Recommended Playbook:*\n _{action}_"},
                     ],
                 },
                 {"type": "divider"},
@@ -99,7 +182,7 @@ class AlertPayloadBuilder:
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": f"📍 Environment: *{env.upper()}* | ⏱ Timestamp: *{ts}* | Engine: *Random Forest + SHAP*",
+                            "text": f" Environment: *{env.upper()}* | Timestamp: *{ts}* | Engine: *Random Forest + SHAP*",
                         }
                     ],
                 },
@@ -158,6 +241,11 @@ class WebhookNotifier:
     ):
         self.slack_webhook_url = slack_webhook_url or os.getenv("SLACK_WEBHOOK_URL")
         self.crm_webhook_url = crm_webhook_url or os.getenv("CRM_WEBHOOK_URL")
+        if self.slack_webhook_url:
+            validate_webhook_url(self.slack_webhook_url)
+        if self.crm_webhook_url:
+            validate_webhook_url(self.crm_webhook_url)
+
         if alert_threshold is not None:
             self.alert_threshold = alert_threshold
         else:
@@ -203,10 +291,12 @@ class WebhookNotifier:
 
         destinations = []
         if self.slack_webhook_url:
+            validate_webhook_url(self.slack_webhook_url)
             destinations.append(
                 ("Slack", self.slack_webhook_url, AlertPayloadBuilder.build_slack_blocks)
             )
         if self.crm_webhook_url:
+            validate_webhook_url(self.crm_webhook_url)
             destinations.append(
                 ("CRM", self.crm_webhook_url, AlertPayloadBuilder.build_generic_crm_payload)
             )

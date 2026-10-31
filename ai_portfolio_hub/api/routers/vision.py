@@ -8,17 +8,22 @@ Endpoints:
 
 import base64
 import io
-from typing import List, Optional, Tuple
+
 import cv2
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status
 import numpy as np
-from PIL import Image
 import tensorflow as tf
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from PIL import Image
 
 from ..config import CIFAR10_CLASSES
+from ..rate_limiter import rate_limit
 from ..schemas import VisionOutput, VisionPredictionItem
 
 router = APIRouter(prefix="/vision", tags=["Computer Vision"])
+
+MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
+ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
+
 
 
 def get_last_conv_layer(model: tf.keras.Model) -> str:
@@ -64,7 +69,7 @@ def compute_gradcam(
     return heatmap.numpy()
 
 
-@router.post("/classify", response_model=VisionOutput)
+@router.post("/classify", response_model=VisionOutput, dependencies=[Depends(rate_limit(15))])
 async def classify_image(request: Request, file: UploadFile = File(...)):
     """
     Classify uploaded image (multipart/form-data), compute top-k predictions,
@@ -77,6 +82,12 @@ async def classify_image(request: Request, file: UploadFile = File(...)):
             detail="Vision CNN model is not loaded.",
         )
 
+    if file.content_type and file.content_type not in ALLOWED_IMAGE_MIMES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file type '{file.content_type}'. Allowed types: {', '.join(sorted(ALLOWED_IMAGE_MIMES))}",
+        )
+
     content = await file.read()
     if len(content) == 0:
         raise HTTPException(
@@ -84,13 +95,19 @@ async def classify_image(request: Request, file: UploadFile = File(...)):
             detail="Uploaded image file is empty.",
         )
 
+    if len(content) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Image file size exceeds maximum allowed limit of {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB.",
+        )
+
     try:
         pil_img = Image.open(io.BytesIO(content)).convert("RGB")
-    except Exception as exc:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid image format: {exc}",
-        ) from exc
+            detail="Invalid image format or corrupted image payload.",
+        ) from None
 
     # Resize to 32x32 for CIFAR-10 model
     resized_pil = pil_img.resize((32, 32), Image.Resampling.BILINEAR)

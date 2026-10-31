@@ -4,7 +4,8 @@ Coordinates maximum entropy policy optimization, Twin Critic updates,
 temperature auto-tuning, and Polyak target smoothing.
 """
 
-from typing import Dict, Tuple
+from typing import Dict
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -127,7 +128,7 @@ class SACAgent:
         # -----------------------------
         # 4. Soft Target Update (Polyak)
         # -----------------------------
-        for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
+        for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters(), strict=False):
             target_param.data.copy_(self.tau * param.data + (1.0 - self.tau) * target_param.data)
 
         return {
@@ -149,7 +150,7 @@ class SACAgent:
         )
 
     def load_checkpoint(self, path: str):
-        checkpoint = torch.load(path, map_location=self.device)
+        checkpoint = torch.load(path, map_location=self.device, weights_only=True)
         self.actor.load_state_dict(checkpoint["actor"])
         self.critic.load_state_dict(checkpoint["critic"])
         self.critic_target.load_state_dict(checkpoint["critic_target"])

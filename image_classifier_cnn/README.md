@@ -10,32 +10,32 @@ The convolutional neural network is engineered to process 32x32x3 RGB images (CI
 
 ```
 Input Image (32x32x3)
-        │
-        ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Block 1: Conv2D (32, 3x3, same) -> BatchNorm -> Conv2D(32)   │
-│          MaxPool2D (2x2) -> Dropout (0.25)                  │
-└─────────────────────────────────────────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Block 2: Conv2D (64, 3x3, same) -> BatchNorm -> Conv2D(64)   │
-│          MaxPool2D (2x2) -> Dropout (0.25)                  │
-└─────────────────────────────────────────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Block 3: Conv2D (128, 3x3, same) -> BatchNorm               │
-│          MaxPool2D (2x2) -> Dropout (0.30)                  │
-└─────────────────────────────────────────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Dense Head: Flatten -> Dense (256, ReLU) -> BatchNorm       │
-│             Dropout (0.50) -> Dense (10, Softmax)           │
-└─────────────────────────────────────────────────────────────┘
-        │
-        ▼
+        
+        
+
+ Block 1: Conv2D (32, 3x3, same) -> BatchNorm -> Conv2D(32) 
+ MaxPool2D (2x2) -> Dropout (0.25) 
+
+        
+        
+
+ Block 2: Conv2D (64, 3x3, same) -> BatchNorm -> Conv2D(64) 
+ MaxPool2D (2x2) -> Dropout (0.25) 
+
+        
+        
+
+ Block 3: Conv2D (128, 3x3, same) -> BatchNorm 
+ MaxPool2D (2x2) -> Dropout (0.30) 
+
+        
+        
+
+ Dense Head: Flatten -> Dense (256, ReLU) -> BatchNorm 
+ Dropout (0.50) -> Dense (10, Softmax) 
+
+        
+        
 Class Probabilities (10 Categories)
 ```
 
@@ -51,30 +51,30 @@ Class Probabilities (10 Categories)
 
 ```
 image_classifier_cnn/
-├── src/
-│   ├── __init__.py            # Package initialization
-│   ├── config.py              # Hyperparameters, image dimensions, CIFAR-10 class labels, file paths
-│   ├── dataset.py             # Data loader, normalization [0, 1], train/val split, augmentation pipeline
-│   ├── model.py               # Modern multi-block CNN architecture definition
-│   ├── train.py               # Callbacks configuration, training loop, and history curves plot
-│   ├── evaluate.py            # Accuracy, Precision, Recall, F1, classification report, confusion matrix
-│   └── explain.py             # Grad-CAM heatmap generator and 3-panel saliency overlay
-├── api/
-│   ├── __init__.py            # API package initialization
-│   └── app.py                 # FastAPI microservice for multipart image upload classification & Grad-CAM
-├── dashboard/
-│   ├── __init__.py            # Dashboard package initialization
-│   ├── app.py                 # Interactive Streamlit studio application
-│   └── utils.py               # Preprocessing, Grad-CAM generation, and Plotly builders
-├── models/
-│   └── best_cnn_model.keras   # Checkpointed best weights saved during training
-├── artifacts/
-│   ├── training_history.png   # Training vs validation loss & accuracy curves
-│   ├── confusion_matrix.png   # 10-class test confusion matrix heatmap
-│   └── gradcam_sample.png     # 3-panel visual explainability chart
-├── main.py                    # Orchestration script (data -> train -> eval -> test inference -> Grad-CAM)
-├── requirements.txt           # Production dependencies
-└── README.md                  # Comprehensive architectural summary and run manual
+ src/
+ __init__.py # Package initialization
+ config.py # Hyperparameters, image dimensions, CIFAR-10 class labels, file paths
+ dataset.py # Data loader, normalization [0, 1], train/val split, augmentation pipeline
+ model.py # Modern multi-block CNN architecture definition
+ train.py # Callbacks configuration, training loop, and history curves plot
+ evaluate.py # Accuracy, Precision, Recall, F1, classification report, confusion matrix
+ explain.py # Grad-CAM heatmap generator and 3-panel saliency overlay
+ api/
+ __init__.py # API package initialization
+ app.py # FastAPI microservice for multipart image upload classification & Grad-CAM
+ dashboard/
+ __init__.py # Dashboard package initialization
+ app.py # Interactive Streamlit studio application
+ utils.py # Preprocessing, Grad-CAM generation, and Plotly builders
+ models/
+ best_cnn_model.keras # Checkpointed best weights saved during training
+ artifacts/
+ training_history.png # Training vs validation loss & accuracy curves
+ confusion_matrix.png # 10-class test confusion matrix heatmap
+ gradcam_sample.png # 3-panel visual explainability chart
+ main.py # Orchestration script (data -> train -> eval -> test inference -> Grad-CAM)
+ requirements.txt # Production dependencies
+ README.md # Technical documentation and run manual
 ```
 
 ---

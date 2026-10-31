@@ -10,7 +10,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 echo -e "${CYAN}${BOLD}====================================================================${NC}"
-echo -e "${CYAN}${BOLD}       AI Portfolio Hub: Master Verification & Benchmark Runner      ${NC}"
+echo -e "${CYAN}${BOLD} AI Portfolio Hub: Master Verification & Benchmark Runner ${NC}"
 echo -e "${CYAN}${BOLD}====================================================================${NC}"
 
 # 1. Dependency Validation & Fast Install
@@ -32,9 +32,9 @@ done
 if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
     echo -e "${YELLOW}Installing missing packages: ${MISSING_PKGS[*]}...${NC}"
     pip install --quiet "${MISSING_PKGS[@]}"
-    echo -e "${GREEN}✓ All evaluation dependencies installed.${NC}"
+    echo -e "${GREEN}[OK] All evaluation dependencies installed.${NC}"
 else
-    echo -e "${GREEN}✓ All evaluation dependencies verified.${NC}"
+    echo -e "${GREEN}[OK] All evaluation dependencies verified.${NC}"
 fi
 
 # 2. Check Gateway Readiness
@@ -44,7 +44,7 @@ if ! curl -sf http://localhost:8000/health >/dev/null 2>&1; then
     chmod +x launch_hub.sh
     ./launch_hub.sh
 fi
-echo -e "${GREEN}✓ Gateway online at http://localhost:8000${NC}"
+echo -e "${GREEN}[OK] Gateway online at http://localhost:8000${NC}"
 
 # 3. Concurrent Multi-Service Smoke Test
 echo -e "\n${YELLOW}[Stage 3/5] Executing asynchronous multi-endpoint smoke tests...${NC}"
@@ -59,9 +59,9 @@ echo -e "\n${YELLOW}[Stage 5/5] Executing data drift and stability audit...${NC}
 $PYTHON_CMD mlops/drift_monitor.py
 
 echo -e "\n${GREEN}${BOLD}====================================================================${NC}"
-echo -e "${GREEN}${BOLD}       All System Pipelines Verified and Operational!               ${NC}"
+echo -e "${GREEN}${BOLD} All System Pipelines Verified and Operational! ${NC}"
 echo -e "${GREEN}${BOLD}====================================================================${NC}"
-echo -e "• Streamlit UI:        ${CYAN}http://localhost:8501${NC}"
-echo -e "• Swagger OpenAPI:     ${CYAN}http://localhost:8000/docs${NC}"
+echo -e "• Streamlit UI: ${CYAN}http://localhost:8501${NC}"
+echo -e "• Swagger OpenAPI: ${CYAN}http://localhost:8000/docs${NC}"
 echo -e "• Latest Drift Report: ${CYAN}$(ls -t artifacts/mlops/drift_report_*.html 2>/dev/null | head -n 1 || echo 'artifacts/mlops/')${NC}"
-echo -e "• Optimized Weights:   ${CYAN}models/optimized/distilbert_int8.pt${NC}\n"
+echo -e "• Optimized Weights: ${CYAN}models/optimized/distilbert_int8.pt${NC}\n"

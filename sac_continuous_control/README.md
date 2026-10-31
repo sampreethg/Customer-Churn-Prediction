@@ -31,18 +31,18 @@ Production-grade PyTorch and Gymnasium implementation of the Soft Actor-Critic (
 
 ```
 sac_continuous_control/
-├── src/
-│   ├── __init__.py
-│   ├── config.py           # Hyperparameters & path configurations
-│   ├── model.py            # GaussianPolicy & TwinQNetwork
-│   ├── agent.py            # SACAgent coordinating updates
-│   ├── replay_buffer.py    # Continuous numpy experience buffer
-│   └── train.py            # Training and evaluation runner
-├── tests/
-│   ├── __init__.py
-│   └── test_sac.py         # Unit tests for policy bounds & gradients
-├── requirements.txt
-└── README.md
+ src/
+ __init__.py
+ config.py # Hyperparameters & path configurations
+ model.py # GaussianPolicy & TwinQNetwork
+ agent.py # SACAgent coordinating updates
+ replay_buffer.py # Continuous numpy experience buffer
+ train.py # Training and evaluation runner
+ tests/
+ __init__.py
+ test_sac.py # Unit tests for policy bounds & gradients
+ requirements.txt
+ README.md
 ```
 
 ---

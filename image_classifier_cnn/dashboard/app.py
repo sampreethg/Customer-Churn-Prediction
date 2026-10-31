@@ -8,16 +8,23 @@ and side-by-side Grad-CAM visual saliency heatmaps with plain-English diagnostic
 import sys
 import time
 from pathlib import Path
+
 import numpy as np
-from PIL import Image
 import streamlit as st
 import tensorflow as tf
+from PIL import Image
 
 # Configure sys.path so modules inside src and dashboard resolve smoothly
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from dashboard.utils import (
+    build_probability_chart,
+    generate_gradcam_overlay,
+    generate_synthetic_samples,
+    preprocess_image,
+)
 from src.config import (
     CLASS_NAMES,
     IMG_HEIGHT,
@@ -25,17 +32,11 @@ from src.config import (
     MODEL_SAVE_PATH,
     NUM_CLASSES,
 )
-from dashboard.utils import (
-    build_probability_chart,
-    generate_gradcam_overlay,
-    generate_synthetic_samples,
-    preprocess_image,
-)
 
 # Page Setup
 st.set_page_config(
     page_title="CNN Vision & Grad-CAM Studio",
-    page_icon="🔍",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -134,7 +135,7 @@ with st.sidebar:
         "https://raw.githubusercontent.com/keras-team/keras-io/master/templates/img/keras-logo.png",
         width=120,
     )
-    st.markdown("### ⚙️ Studio Controls")
+    st.markdown("### Studio Controls")
 
     # Image Input Mode
     input_mode = st.radio(
@@ -169,7 +170,7 @@ with st.sidebar:
                 st.error(f"Unable to read uploaded image: {e}")
 
     st.markdown("---")
-    st.markdown("### 🎛️ Inference Hyperparameters")
+    st.markdown("### Inference Hyperparameters")
     top_k = st.slider("Top-K Predictions", min_value=1, max_value=10, value=3, step=1)
     confidence_threshold = st.slider(
         "Confidence Warning Threshold",
@@ -181,7 +182,7 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.markdown("### 📐 Model Architecture Specs")
+    st.markdown("### Model Architecture Specs")
     st.markdown(
         f"""
         - **Target Resolution:** `{IMG_HEIGHT}x{IMG_WIDTH}x3` (RGB)
@@ -194,7 +195,7 @@ with st.sidebar:
 
 
 # --- Main Application Body ---
-st.markdown('<div class="main-header">🔍 CNN Vision & Grad-CAM Studio</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header"> CNN Vision & Grad-CAM Studio</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="sub-header">Interactive Computer Vision classification engine with real-time gradient-weighted class activation mapping (Grad-CAM).</div>',
     unsafe_allow_html=True,
@@ -204,14 +205,14 @@ model = load_cached_model()
 
 if model is None:
     st.info(
-        f"ℹ️ **Notice:** Trained checkpoint `{MODEL_SAVE_PATH.name}` is currently training or not yet serialized. "
+        f"[Notice] **Notice:** Trained checkpoint `{MODEL_SAVE_PATH.name}` is currently training or not yet serialized. "
         "Using freshly assembled CNN architecture for interactive interface demonstration."
     )
     from src.model import build_cnn_model
     model = build_cnn_model()
 
 if selected_image is None:
-    st.info("👈 Please select a sample from the gallery or upload an image in the sidebar to begin inference.")
+    st.info(" Please select a sample from the gallery or upload an image in the sidebar to begin inference.")
     st.stop()
 
 # --- Run Inference & Latency Tracking ---
@@ -267,7 +268,7 @@ with col3:
 
 if top_prob < confidence_threshold:
     st.warning(
-        f"⚠️ **Low Confidence Prediction**: Confidence ({top_prob:.1%}) is below the configured threshold ({confidence_threshold:.0%})."
+        f"[Warning] **Low Confidence Prediction**: Confidence ({top_prob:.1%}) is below the configured threshold ({confidence_threshold:.0%})."
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -276,7 +277,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 left_col, right_col = st.columns([1, 1], gap="large")
 
 with left_col:
-    st.markdown("### 🖼️ Input Image & Probability Distribution")
+    st.markdown("### Input Image & Probability Distribution")
     st.image(
         selected_image,
         caption=f"Input: {selected_name} (Native Size: {selected_image.size[0]}x{selected_image.size[1]})",
@@ -288,7 +289,7 @@ with left_col:
     st.plotly_chart(fig, use_container_width=True)
 
 with right_col:
-    st.markdown("### 🧬 Visual Explainability (Grad-CAM)")
+    st.markdown("### Visual Explainability (Grad-CAM)")
     st.markdown(
         "Saliency heatmaps visualize which spatial regions positively stimulated the final feature maps for the top predicted category."
     )

@@ -5,10 +5,11 @@ Maintains a cyclic memory of state transitions and prepares batched PyTorch tens
 for off-policy temporal difference updates.
 """
 
+import random
 from collections import deque
 from dataclasses import dataclass
-import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
+
 import numpy as np
 import torch
 

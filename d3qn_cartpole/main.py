@@ -11,6 +11,7 @@ Executes:
 
 import sys
 from pathlib import Path
+
 import numpy as np
 import torch
 
@@ -20,6 +21,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.evaluate import evaluate_d3qn_agent
+
 from src.agent import D3QNAgent
 from src.config import (
     ACTION_DIM,
@@ -51,18 +53,18 @@ def print_banner(title: str) -> None:
 
 def main():
     print_banner("PRODUCTION DUELING DOUBLE DEEP Q-NETWORK (D3QN) CARTPOLE-V1")
-    print(f"PyTorch Version:       {torch.__version__}")
+    print(f"PyTorch Version: {torch.__version__}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Compute Device:        {device}")
-    print(f"Target Environment:    {ENV_ID}")
-    print(f"State Dimension:       {STATE_DIM} continuous")
-    print(f"Action Dimension:      {ACTION_DIM} discrete")
-    print(f"Batch Size:            {BATCH_SIZE}")
-    print(f"Replay Buffer:         {BUFFER_CAPACITY} transitions")
-    print(f"Discount (Gamma):      {GAMMA}")
+    print(f"Compute Device: {device}")
+    print(f"Target Environment: {ENV_ID}")
+    print(f"State Dimension: {STATE_DIM} continuous")
+    print(f"Action Dimension: {ACTION_DIM} discrete")
+    print(f"Batch Size: {BATCH_SIZE}")
+    print(f"Replay Buffer: {BUFFER_CAPACITY} transitions")
+    print(f"Discount (Gamma): {GAMMA}")
     print(f"Learning Rate (AdamW): {LR}")
-    print(f"Target Sync (Polyak):  Tau = {TAU}")
-    print(f"Convergence Target:    >= {SOLVED_THRESHOLD:.1f} rolling mean reward (100 eps)\n")
+    print(f"Target Sync (Polyak): Tau = {TAU}")
+    print(f"Convergence Target: >= {SOLVED_THRESHOLD:.1f} rolling mean reward (100 eps)\n")
 
     # Set seeds for deterministic initialization
     torch.manual_seed(SEED)
@@ -112,7 +114,7 @@ def main():
         exists = path.is_file()
         size_kb = path.stat().st_size / 1024 if exists else 0.0
         status_str = f"[OK] ({size_kb:.1f} KB)" if exists else "[MISSING]"
-        print(f"  {label:<28}: {status_str:<18} -> {path.name}")
+        print(f" {label:<28}: {status_str:<18} -> {path.name}")
 
     print(f"\nFinal Deterministic Evaluation Score: {mean_eval_reward:.1f} / 500.0 pts")
     if mean_eval_reward >= SOLVED_THRESHOLD:

@@ -12,6 +12,7 @@ Executes the full pipeline:
 
 import sys
 from pathlib import Path
+
 import numpy as np
 
 # Ensure project root is in sys.path
@@ -53,10 +54,10 @@ def print_banner(title: str):
 def main():
     print_banner("PRODUCTION CNN COMPUTER VISION CLASSIFICATION SYSTEM")
     print(f"TensorFlow Version: {tf.__version__}")
-    print(f"GPU Available:      {bool(tf.config.list_physical_devices('GPU'))}")
-    print(f"Project Root:       {PROJECT_ROOT}")
-    print(f"Model Checkpoint:   {MODEL_SAVE_PATH}")
-    print(f"Artifacts Dir:      {ARTIFACTS_DIR}\n")
+    print(f"GPU Available: {bool(tf.config.list_physical_devices('GPU'))}")
+    print(f"Project Root: {PROJECT_ROOT}")
+    print(f"Model Checkpoint: {MODEL_SAVE_PATH}")
+    print(f"Artifacts Dir: {ARTIFACTS_DIR}\n")
 
     # Step 1: Directory Setup
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
@@ -91,8 +92,8 @@ def main():
     )
 
     # Step 5: Test Evaluation & Confusion Matrix
-    print_banner("PHASE 4: COMPREHENSIVE TEST EVALUATION")
-    metrics = evaluate_model(
+    print_banner("PHASE 4: TEST EVALUATION")
+    evaluate_model(
         model=trained_model,
         x_test=x_test,
         y_test=y_test,
@@ -132,7 +133,7 @@ def main():
         all_exist = all_exist and exists
         size_kb = path.stat().st_size / 1024 if exists else 0.0
         status_str = f"[OK] ({size_kb:.1f} KB)" if exists else "[MISSING]"
-        print(f"  {label:<28}: {status_str:<18} -> {path.name}")
+        print(f" {label:<28}: {status_str:<18} -> {path.name}")
 
     if all_exist:
         print("\nAll pipeline stages and production artifacts generated successfully!")

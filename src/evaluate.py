@@ -50,7 +50,7 @@ def evaluate_model(
         Dictionary of key evaluation metrics.
     """
     print("\n" + "=" * 60)
-    print("           STAGE 2: MODEL EVALUATION & DIAGNOSTICS")
+    print(" STAGE 2: MODEL EVALUATION & DIAGNOSTICS")
     print("=" * 60)
 
     # Predictions and Probabilities
@@ -74,23 +74,23 @@ def evaluate_model(
 
     # Console Metrics Presentation (ASCII for cross-platform Windows compatibility)
     print("\n[Holdout Test Performance]")
-    print(f"  * Accuracy:  {acc:.4f} ({acc * 100:.2f}%)")
-    print(f"  * Precision: {prec:.4f} ({prec * 100:.2f}%)")
-    print(f"  * Recall:    {rec:.4f} ({rec * 100:.2f}%)")
-    print(f"  * F1-Score:  {f1:.4f}")
-    print(f"  * ROC-AUC:   {roc_auc:.4f}")
+    print(f" * Accuracy: {acc:.4f} ({acc * 100:.2f}%)")
+    print(f" * Precision: {prec:.4f} ({prec * 100:.2f}%)")
+    print(f" * Recall: {rec:.4f} ({rec * 100:.2f}%)")
+    print(f" * F1-Score: {f1:.4f}")
+    print(f" * ROC-AUC: {roc_auc:.4f}")
 
     # Confusion Matrix Presentation
     cm = confusion_matrix(y_test, y_pred)
     tn, fp, fn, tp = cm.ravel()
     print("\n[Confusion Matrix Breakdown]")
-    print("  +---------------------+---------------------+")
-    print("  | True Negatives (TN) | False Positives(FP) |")
-    print(f"  | {tn:<19} | {fp:<19} |")
-    print("  +---------------------+---------------------+")
-    print("  | False Negatives(FN) | True Positives (TP) |")
-    print(f"  | {fn:<19} | {tp:<19} |")
-    print("  +---------------------+---------------------+")
+    print(" +---------------------+---------------------+")
+    print(" | True Negatives (TN) | False Positives(FP) |")
+    print(f" | {tn:<19} | {fp:<19} |")
+    print(" +---------------------+---------------------+")
+    print(" | False Negatives(FN) | True Positives (TP) |")
+    print(f" | {fn:<19} | {tp:<19} |")
+    print(" +---------------------+---------------------+")
 
     # Classification Report
     print("\n[Detailed Classification Report]")
@@ -170,7 +170,7 @@ def _save_evaluation_plots(
         print(f"[Artifact Saved] ROC curve visualization: {roc_path.resolve()}")
         return
 
-    except ImportError:  # pragma: no cover
+    except ImportError: # pragma: no cover
         pass
 
     # Pure Pillow High-Resolution Rendering Fallback
@@ -223,7 +223,7 @@ def _save_evaluation_plots(
 
     draw.text((80, 25), "Receiver Operating Characteristic (ROC) Curve", fill="#0f172a")
     draw.text(
-        (80, 50), f"Model: Random Forest Pipeline  |  ROC-AUC = {roc_auc:.4f}", fill="#2563eb"
+        (80, 50), f"Model: Random Forest Pipeline | ROC-AUC = {roc_auc:.4f}", fill="#2563eb"
     )
 
     # Plot boundaries
@@ -235,7 +235,7 @@ def _save_evaluation_plots(
     draw.line([(plot_x0, plot_y0), (plot_x0, plot_y1)], fill="#475569", width=2)
 
     # Gridlines and baseline
-    draw.line([(plot_x0, plot_y1), (plot_x1, plot_y0)], fill="#94a3b8", width=2)  # 45 deg chance
+    draw.line([(plot_x0, plot_y1), (plot_x1, plot_y0)], fill="#94a3b8", width=2) # 45 deg chance
     draw.text((plot_x1 - 180, plot_y0 + 20), "-- Chance (AUC=0.50)", fill="#94a3b8")
 
     # Plot curve points

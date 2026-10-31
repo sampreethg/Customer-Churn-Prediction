@@ -3,11 +3,13 @@ Tab 2: Computer Vision & Explainable AI (Grad-CAM).
 """
 
 import io
+import os
+
 import cv2
 import numpy as np
-from PIL import Image
 import requests
 import streamlit as st
+from PIL import Image
 
 from ..components import build_probability_bar_chart, render_metric_card
 
@@ -46,7 +48,7 @@ def create_sample_gallery() -> dict[str, Image.Image]:
 
 
 def render_tab_vision(api_base_url: str):
-    st.markdown("### 🖼️ Computer Vision & Explainable AI (Grad-CAM)")
+    st.markdown("### Computer Vision & Explainable AI (Grad-CAM)")
     st.markdown(
         "Classify images into CIFAR-10 object categories using a multi-block CNN and "
         "render gradient-weighted class activation mapping (Grad-CAM) heatmaps revealing the exact spatial triggers."
@@ -56,7 +58,7 @@ def render_tab_vision(api_base_url: str):
     gallery = create_sample_gallery()
 
     with col_ctrl:
-        st.markdown("#### 📥 Select or Upload Image")
+        st.markdown("#### Select or Upload Image")
         input_choice = st.radio("Input Source", ["Preloaded Sample Gallery", "Upload Custom Image"], horizontal=True)
 
         selected_pil = None
@@ -72,7 +74,7 @@ def render_tab_vision(api_base_url: str):
             st.image(selected_pil, caption="Selected Image Input", use_container_width=True)
 
     with col_view:
-        st.markdown("#### 🔬 Neural Predictions & Spatial Saliency")
+        st.markdown("#### Neural Predictions & Spatial Saliency")
         if selected_pil is not None:
             # Convert PIL image to byte stream
             buf = io.BytesIO()
@@ -81,7 +83,8 @@ def render_tab_vision(api_base_url: str):
 
             try:
                 files = {"file": ("input.png", image_bytes, "image/png")}
-                resp = requests.post(f"{api_base_url}/api/v1/vision/classify", files=files, timeout=6)
+                headers = {"X-API-Key": os.getenv("API_KEY", "dev-secret-key-2026")}
+                resp = requests.post(f"{api_base_url}/api/v1/vision/classify", files=files, headers=headers, timeout=6)
                 if resp.status_code == 200:
                     data = resp.json()
                     top_cls = data["top_class"]
@@ -106,8 +109,8 @@ def render_tab_vision(api_base_url: str):
                 else:
                     st.error(f"API Error ({resp.status_code}): {resp.text}")
             except Exception as exc:
-                st.warning(f"⚠️ Gateway connection note: {exc}. Displaying sample predictions.")
+                st.warning(f"[Warning] Gateway connection note: {exc}. Displaying sample predictions.")
                 render_metric_card("Top Classification", "Automobile", "92.4% Confidence", border_color="#3b82f6")
         else:
-            st.info("👈 Please select or upload an image to run CNN inference.")
+            st.info(" Please select or upload an image to run CNN inference.")
 

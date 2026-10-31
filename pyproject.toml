@@ -19,9 +19,9 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B"]
 ignore = [
-    "E501",  # Line length handled by formatter
-    "B008",  # Do not perform function call in argument defaults (standard for FastAPI Depends/BackgroundTasks)
-    "E402",  # Module level import not at top of file (needed for sys.path bootstrapping in orchestrator)
+    "E501", # Line length handled by formatter
+    "B008", # Do not perform function call in argument defaults (standard for FastAPI Depends/BackgroundTasks)
+    "E402", # Module level import not at top of file (needed for sys.path bootstrapping in orchestrator)
 ]
 
 [tool.ruff.lint.isort]

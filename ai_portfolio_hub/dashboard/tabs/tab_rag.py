@@ -4,8 +4,10 @@ Provides document ingestion, FAISS indexing, query execution,
 and citation tracking with grounded hallucination-risk scoring.
 """
 
-from pathlib import Path
+import os
 import time
+from pathlib import Path
+
 import requests
 import streamlit as st
 
@@ -15,7 +17,7 @@ API_URL = "http://localhost:8000/api/v1/rag"
 def render_rag_tab(api_base_url: str = "http://localhost:8000"):
     base_rag_url = f"{api_base_url.rstrip('/')}/api/v1/rag"
 
-    st.subheader("📚 Domain 5: Grounded RAG Document Intelligence")
+    st.subheader(" Domain 5: Grounded RAG Document Intelligence")
     st.markdown(
         "Query technical architecture files, research notes, and manuals with "
         "**Bi-Encoder semantic search** (`all-MiniLM-L6-v2`), **Cross-Encoder reranking**, "
@@ -32,7 +34,7 @@ def render_rag_tab(api_base_url: str = "http://localhost:8000"):
             accept_multiple_files=True,
         )
 
-        if uploaded_files and st.button("⚡ Index Documents into Vector Store", use_container_width=True):
+        if uploaded_files and st.button(" Index Documents into Vector Store", use_container_width=True):
             with st.spinner("Extracting chunks & computing dense embeddings..."):
                 # Save files temporarily for backend indexing
                 temp_dir = Path("data/sample_docs")
@@ -42,9 +44,11 @@ def render_rag_tab(api_base_url: str = "http://localhost:8000"):
                     file_path.write_bytes(uf.getbuffer())
 
                 try:
+                    headers = {"X-API-Key": os.getenv("API_KEY", "dev-secret-key-2026")}
                     resp = requests.post(
                         f"{base_rag_url}/index-docs",
                         json={"directory_path": str(temp_dir)},
+                        headers=headers,
                         timeout=30.0,
                     )
                     if resp.status_code == 200:
@@ -79,7 +83,7 @@ def render_rag_tab(api_base_url: str = "http://localhost:8000"):
             )
 
         top_k = st.slider("Citations to retrieve (Cross-Encoder Top-K):", 1, 5, 3)
-        run_query = st.button("🔎 Run Grounded Search", type="primary", use_container_width=True)
+        run_query = st.button(" Run Grounded Search", type="primary", use_container_width=True)
 
     with col_right:
         st.markdown("#### 3. Synthesized Grounded Response")
@@ -88,9 +92,11 @@ def render_rag_tab(api_base_url: str = "http://localhost:8000"):
             t0 = time.perf_counter()
             with st.spinner("Retrieving dense vectors & reranking..."):
                 try:
+                    headers = {"X-API-Key": os.getenv("API_KEY", "dev-secret-key-2026")}
                     resp = requests.post(
                         f"{base_rag_url}/query",
                         json={"query": query_input, "top_k": top_k},
+                        headers=headers,
                         timeout=15.0,
                     )
                     if resp.status_code == 200:

@@ -92,7 +92,7 @@ def train_model(
         Fitted best_estimator_, X_train, X_test, y_train, y_test.
     """
     print("=" * 60)
-    print("           STAGE 1: MODEL TRAINING & OPTIMIZATION")
+    print(" STAGE 1: MODEL TRAINING & OPTIMIZATION")
     print("=" * 60)
 
     X, y = load_dataset(data_path=data_path)
@@ -148,7 +148,7 @@ def train_model(
     print("Optimized Hyperparameters:")
     for param_name, param_val in grid_search.best_params_.items():
         clean_param = param_name.replace("classifier__", "")
-        print(f"  - {clean_param}: {param_val}")
+        print(f" - {clean_param}: {param_val}")
 
     # Persist Best Estimator
     out_path = Path(model_output_path)

@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-import pytest
+
 import numpy as np
 import pandas as pd
 
@@ -8,8 +8,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from mlops_observability.src.drift_detector import StatisticalDriftDetector, calculate_psi
 from mlops_observability.src.alerting import DriftAlertManager
+from mlops_observability.src.drift_detector import StatisticalDriftDetector, calculate_psi
 
 
 def test_identical_distributions_no_drift():
@@ -57,9 +57,9 @@ def test_dataset_drift_retrain_trigger():
 
     # Drastically shift 2 of the 3 features (> 33% ratio)
     cur_df = pd.DataFrame({
-        "Tenure": np.random.normal(60, 6, n),  # shifted
-        "Charges": np.random.uniform(100, 150, n),  # shifted
-        "Tickets": np.random.poisson(1.5, n),  # stable
+        "Tenure": np.random.normal(60, 6, n), # shifted
+        "Charges": np.random.uniform(100, 150, n), # shifted
+        "Tickets": np.random.poisson(1.5, n), # stable
     })
 
     detector = StatisticalDriftDetector(dataset_drift_ratio=0.33)

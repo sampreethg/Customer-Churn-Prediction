@@ -36,7 +36,7 @@ def run_pipeline() -> None:
     Execute full customer churn machine learning pipeline lifecycle.
     """
     print("\n" + "#" * 65)
-    print("      PRODUCTION-GRADE CUSTOMER CHURN PREDICTION PIPELINE")
+    print(" PRODUCTION-GRADE CUSTOMER CHURN PREDICTION PIPELINE")
     print("#" * 65)
     print(f"Project Root: {PROJECT_ROOT.resolve()}")
 
@@ -87,14 +87,14 @@ def run_pipeline() -> None:
     )
 
     print("\n" + "#" * 65)
-    print("       CHURN PREDICTION WORKFLOW SUCCESSFULLY COMPLETED")
+    print(" CHURN PREDICTION WORKFLOW SUCCESSFULLY COMPLETED")
     print("#" * 65)
     print("Artifacts generated:")
-    print(f"  * Trained Model:      {MODEL_PATH.resolve()}")
-    print(f"  * Dataset:            {DATA_PATH.resolve()}")
-    print(f"  * Confusion Matrix:   {(ARTIFACTS_DIR / 'confusion_matrix.png').resolve()}")
-    print(f"  * ROC Curve:          {(ARTIFACTS_DIR / 'roc_curve.png').resolve()}")
-    print(f"  * Feature Importance: {(ARTIFACTS_DIR / 'feature_importance.png').resolve()}")
+    print(f" * Trained Model: {MODEL_PATH.resolve()}")
+    print(f" * Dataset: {DATA_PATH.resolve()}")
+    print(f" * Confusion Matrix: {(ARTIFACTS_DIR / 'confusion_matrix.png').resolve()}")
+    print(f" * ROC Curve: {(ARTIFACTS_DIR / 'roc_curve.png').resolve()}")
+    print(f" * Feature Importance: {(ARTIFACTS_DIR / 'feature_importance.png').resolve()}")
 
 
 if __name__ == "__main__":

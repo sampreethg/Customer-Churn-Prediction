@@ -77,8 +77,8 @@ class DuelingDQN(nn.Module):
             Q-values of shape (B, action_dim).
         """
         features = self.feature_network(state)
-        val = self.value_stream(features)         # Shape: (B, 1)
-        adv = self.advantage_stream(features)     # Shape: (B, action_dim)
+        val = self.value_stream(features) # Shape: (B, 1)
+        adv = self.advantage_stream(features) # Shape: (B, action_dim)
 
         # Enforce parameter identifiability via mean subtraction:
         # Q(s, a) = V(s) + (A(s, a) - mean_{a'} A(s, a'))

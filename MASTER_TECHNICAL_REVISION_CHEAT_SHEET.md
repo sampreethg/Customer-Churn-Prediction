@@ -129,15 +129,15 @@ Catastrophic divergence occurs when combining:
 ### 5.2 DQN vs. Double DQN vs. Dueling D3QN
 
 ```
-      Standard DQN              Double DQN (DDQN)             Dueling DQN
-┌───────────────────────┐   ┌───────────────────────┐   ┌───────────────────────────┐
-│ Target:               │   │ Target:               │   │ Q(s, a) = V(s) +          │
-│ r + γ max Q(s', a'; θ⁻)│  │ r + γ Q(s', a*; θ⁻)   │   │  (A(s, a) - 1/|A| Σ A)    │
-│                       │   │ where:                │   │                           │
-│ (Suffers from positive│   │ a* = argmax Q(s', a; θ)│  │ Separates State-Value     │
-│ overestimation bias)  │   │ (Decouples selection  │   │ from Action-Advantage     │
-│                       │   │  from evaluation)     │   │ identifiability           │
-└───────────────────────┘   └───────────────────────┘   └───────────────────────────┘
+      Standard DQN Double DQN (DDQN) Dueling DQN
+ 
+ Target: Target: Q(s, a) = V(s) + 
+ r + γ max Q(s', a'; θ⁻) r + γ Q(s', a*; θ⁻) (A(s, a) - 1/|A| Σ A) 
+ where: 
+ (Suffers from positive a* = argmax Q(s', a; θ) Separates State-Value 
+ overestimation bias) (Decouples selection from Action-Advantage 
+ from evaluation) identifiability 
+ 
 ```
 
 ### 5.3 Prioritized Experience Replay (PER)

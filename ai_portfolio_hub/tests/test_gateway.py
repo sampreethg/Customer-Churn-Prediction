@@ -10,24 +10,19 @@ Tests endpoints across all 4 domains:
 """
 
 import io
-import sys
-from pathlib import Path
+
 import cv2
-from fastapi.testclient import TestClient
 import numpy as np
 import pytest
+from fastapi.testclient import TestClient
 from PIL import Image
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from api.app import app
+from ai_portfolio_hub.api.app import app
 
 
 @pytest.fixture(scope="module")
 def client():
-    with TestClient(app) as test_client:
+    with TestClient(app, headers={"X-API-Key": "test-api-key"}) as test_client:
         yield test_client
 
 
@@ -109,7 +104,7 @@ def test_rl_cartpole_playback(client):
     assert "q_values_history" in data
     assert data["steps"] > 0
     assert len(data["state_history"]) == data["steps"]
-    assert len(data["state_history"][0]) == 4  # 4D state vector
+    assert len(data["state_history"][0]) == 4 # 4D state vector
 
 
 def test_rag_ingest_and_query(client):

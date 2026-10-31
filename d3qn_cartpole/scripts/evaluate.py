@@ -7,6 +7,7 @@ evaluates policy stability, and logs step counts per trial.
 
 import sys
 from pathlib import Path
+
 import gymnasium as gym
 import numpy as np
 
@@ -45,7 +46,7 @@ def evaluate_d3qn_agent(
         Average reward score across evaluation trials.
     """
     print("\n" + "=" * 65)
-    print(f"       D3QN DETERMINISTIC POLICY EVALUATION: {env_id}")
+    print(f" D3QN DETERMINISTIC POLICY EVALUATION: {env_id}")
     print("=" * 65)
 
     if not model_path.is_file():
@@ -78,7 +79,7 @@ def evaluate_d3qn_agent(
 
         rewards.append(total_reward)
         tag = "[PERFECT 500]" if total_reward >= 500.0 else f"[{total_reward:.0f} steps]"
-        print(f"  Trial {episode:02d}/{num_episodes:02d} | Reward: {total_reward:5.1f} / {MAX_STEPS_PER_EPISODE} {tag}")
+        print(f" Trial {episode:02d}/{num_episodes:02d} | Reward: {total_reward:5.1f} / {MAX_STEPS_PER_EPISODE} {tag}")
 
     env.close()
 
@@ -87,10 +88,10 @@ def evaluate_d3qn_agent(
 
     print("\n" + "-" * 65)
     print(f"D3QN Evaluation Summary ({num_episodes} Trials):")
-    print(f"  Mean Score:         {mean_reward:.2f} +/- {std_reward:.2f}")
-    print(f"  Max Score:          {max(rewards):.2f}")
-    print(f"  Min Score:          {min(rewards):.2f}")
-    print(f"  Success Rate (500): {sum(1 for r in rewards if r >= 500.0) / num_episodes * 100:.1f}%")
+    print(f" Mean Score: {mean_reward:.2f} +/- {std_reward:.2f}")
+    print(f" Max Score: {max(rewards):.2f}")
+    print(f" Min Score: {min(rewards):.2f}")
+    print(f" Success Rate (500): {sum(1 for r in rewards if r >= 500.0) / num_episodes * 100:.1f}%")
     print("-" * 65 + "\n")
 
     return mean_reward

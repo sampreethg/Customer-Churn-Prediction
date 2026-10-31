@@ -2,6 +2,8 @@
 Tab 4: Deep Reinforcement Learning (PER-D3QN CartPole-v1).
 """
 
+import os
+
 import requests
 import streamlit as st
 
@@ -9,7 +11,7 @@ from ..components import build_cartpole_trajectory_chart, render_metric_card
 
 
 def render_tab_rl(api_base_url: str):
-    st.markdown("### 🕹️ Deep Reinforcement Learning (Dueling Double DQN on CartPole-v1)")
+    st.markdown("### Deep Reinforcement Learning (Dueling Double DQN on CartPole-v1)")
     st.markdown(
         "Execute the trained D3QN neural policy on the continuous-state `CartPole-v1` balancing environment. "
         "Inspect step-by-step 4D physics state trajectories, action Q-value distributions, and stability metrics."
@@ -18,9 +20,9 @@ def render_tab_rl(api_base_url: str):
     col_ctrl, col_graph = st.columns([1, 2], gap="large")
 
     with col_ctrl:
-        st.markdown("#### 🎮 Simulation Settings")
+        st.markdown("#### Simulation Settings")
         ep_seed = st.number_input("Environment Seed", min_value=1, max_value=9999, value=42, step=1)
-        sim_btn = st.button("▶️ Run Simulation Episode", use_container_width=True)
+        st.button(" Run Simulation Episode", use_container_width=True)
 
         st.markdown("---")
         st.markdown(
@@ -35,11 +37,12 @@ def render_tab_rl(api_base_url: str):
         )
 
     with col_graph:
-        st.markdown("#### 📊 Simulation Trajectory & Policy Dynamics")
+        st.markdown("#### Simulation Trajectory & Policy Dynamics")
 
         try:
             payload = {"episodes": 1, "seed": int(ep_seed)}
-            resp = requests.post(f"{api_base_url}/api/v1/rl/playback", json=payload, timeout=8)
+            headers = {"X-API-Key": os.getenv("API_KEY", "dev-secret-key-2026")}
+            resp = requests.post(f"{api_base_url}/api/v1/rl/playback", json=payload, headers=headers, timeout=8)
             if resp.status_code == 200:
                 data = resp.json()
                 total_reward = data["total_reward"]
@@ -72,6 +75,6 @@ def render_tab_rl(api_base_url: str):
             else:
                 st.error(f"API Error ({resp.status_code}): {resp.text}")
         except Exception as exc:
-            st.warning(f"⚠️ Gateway connection note: {exc}. Displaying policy demonstration.")
+            st.warning(f"[Warning] Gateway connection note: {exc}. Displaying policy demonstration.")
             render_metric_card("Episode Reward", "500 pts", "Perfect Stability", border_color="#16a34a")
 

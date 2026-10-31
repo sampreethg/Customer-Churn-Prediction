@@ -2,6 +2,8 @@
 Tab 1: Customer Churn Intelligence & SHAP Explainability.
 """
 
+import os
+
 import requests
 import streamlit as st
 
@@ -9,7 +11,7 @@ from ..components import build_gauge_chart, build_shap_bar_chart, render_metric_
 
 
 def render_tab_tabular(api_base_url: str):
-    st.markdown("### 📊 Customer Churn Intelligence & Risk Forecasting")
+    st.markdown("### Customer Churn Intelligence & Risk Forecasting")
     st.markdown(
         "Predict customer churn probability, classify risk tiers using the cost-benefit optimal threshold, "
         "and inspect local SHAP feature attributions driving retention behavior."
@@ -18,7 +20,7 @@ def render_tab_tabular(api_base_url: str):
     col_in, col_out = st.columns([1, 1.2], gap="large")
 
     with col_in:
-        st.markdown("#### 👤 Account Subscription Features")
+        st.markdown("#### Account Subscription Features")
         with st.form("churn_input_form"):
             tenure = st.slider("Tenure (Months)", min_value=0, max_value=72, value=12, step=1)
             monthly_charges = st.number_input("Monthly Charges ($USD)", min_value=10.0, max_value=200.0, value=85.0, step=5.0)
@@ -28,10 +30,10 @@ def render_tab_tabular(api_base_url: str):
             payment_method = st.selectbox("Payment Method", ["Electronic check", "Mailed check", "Bank transfer", "Credit card"], index=0)
             age = st.slider("Customer Age", min_value=18, max_value=90, value=45, step=1)
 
-            submit_btn = st.form_submit_button("⚡ Evaluate Churn Risk", use_container_width=True)
+            st.form_submit_button(" Evaluate Churn Risk", use_container_width=True)
 
     with col_out:
-        st.markdown("#### 📈 Model Diagnostics & Prescriptive Action")
+        st.markdown("#### Model Diagnostics & Prescriptive Action")
 
         payload = {
             "Tenure_Months": tenure,
@@ -45,7 +47,8 @@ def render_tab_tabular(api_base_url: str):
         }
 
         try:
-            resp = requests.post(f"{api_base_url}/api/v1/tabular/predict", json=payload, timeout=5)
+            headers = {"X-API-Key": os.getenv("API_KEY", "dev-secret-key-2026")}
+            resp = requests.post(f"{api_base_url}/api/v1/tabular/predict", json=payload, headers=headers, timeout=5)
             if resp.status_code == 200:
                 data = resp.json()
                 prob = data["churn_probability"]
@@ -69,7 +72,7 @@ def render_tab_tabular(api_base_url: str):
                 st.markdown(
                     f"""
                     <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 16px; border-radius: 6px; color: #166534; font-size: 0.95rem;">
-                        <b>💡 Actionable Retention Strategy:</b><br>{action}
+                        <b>[Info] Actionable Retention Strategy:</b><br>{action}
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -77,6 +80,6 @@ def render_tab_tabular(api_base_url: str):
             else:
                 st.error(f"API Error ({resp.status_code}): {resp.text}")
         except Exception as exc:
-            st.warning(f"⚠️ Gateway connection note: {exc}. Displaying standalone evaluation.")
+            st.warning(f"[Warning] Gateway connection note: {exc}. Displaying standalone evaluation.")
             st.plotly_chart(build_gauge_chart(0.72), use_container_width=True)
 

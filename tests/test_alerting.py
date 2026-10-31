@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 from api.app import app
 from src.alerting import AlertPayloadBuilder, WebhookNotifier
 
-client = TestClient(app)
+client = TestClient(app, headers={"X-API-Key": "test-api-key"})
 
 
 def test_slack_payload_builder():

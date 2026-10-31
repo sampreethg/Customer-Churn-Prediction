@@ -2,6 +2,8 @@
 Tab 3: Contextual Transformer Sentiment Analysis (DistilBERT).
 """
 
+import os
+
 import requests
 import streamlit as st
 
@@ -9,7 +11,7 @@ from ..components import build_probability_bar_chart, render_metric_card
 
 
 def render_tab_nlp(api_base_url: str):
-    st.markdown("### 💬 Contextual Transformer Sentiment Analysis (DistilBERT)")
+    st.markdown("### Contextual Transformer Sentiment Analysis (DistilBERT)")
     st.markdown(
         "Analyze customer feedback, product reviews, and operational queries using a fine-tuned "
         "DistilBERT sequence classification model with calibrated Softmax probabilities and subword tokenization."
@@ -24,21 +26,22 @@ def render_tab_nlp(api_base_url: str):
     }
 
     with col_in:
-        st.markdown("#### ✍️ Enter Text or Select Sample")
+        st.markdown("#### Enter Text or Select Sample")
         preset_choice = st.selectbox("Quick Presets", list(preset_texts.keys()))
         user_text = st.text_area(
             "Customer Review / Feedback",
             value=preset_texts[preset_choice],
             height=160,
         )
-        analyze_btn = st.button("🚀 Analyze Sentiment", use_container_width=True)
+        st.button(" Analyze Sentiment", use_container_width=True)
 
     with col_out:
-        st.markdown("#### 🎯 Transformer Classification Results")
+        st.markdown("#### Transformer Classification Results")
         if user_text:
             try:
                 payload = {"text": user_text}
-                resp = requests.post(f"{api_base_url}/api/v1/nlp/analyze", json=payload, timeout=5)
+                headers = {"X-API-Key": os.getenv("API_KEY", "dev-secret-key-2026")}
+                resp = requests.post(f"{api_base_url}/api/v1/nlp/analyze", json=payload, headers=headers, timeout=5)
                 if resp.status_code == 200:
                     data = resp.json()
                     label = data["label"]
@@ -72,8 +75,8 @@ def render_tab_nlp(api_base_url: str):
                 else:
                     st.error(f"API Error ({resp.status_code}): {resp.text}")
             except Exception as exc:
-                st.warning(f"⚠️ Gateway connection note: {exc}. Displaying standalone evaluation.")
+                st.warning(f"[Warning] Gateway connection note: {exc}. Displaying standalone evaluation.")
                 render_metric_card("Sentiment", "POSITIVE", "94.2% Confidence", border_color="#16a34a")
         else:
-            st.info("👈 Enter review text to analyze sentiment.")
+            st.info(" Enter review text to analyze sentiment.")
 

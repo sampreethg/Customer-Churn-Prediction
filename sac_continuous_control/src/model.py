@@ -6,6 +6,7 @@ Includes:
 """
 
 from typing import Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -46,7 +47,7 @@ class GaussianPolicy(nn.Module):
 
         # Reparameterization: u = mean + std * eps
         normal = torch.distributions.Normal(mean, std)
-        u = normal.rsample()  # for backpropagation through stochastic nodes
+        u = normal.rsample() # for backpropagation through stochastic nodes
         y = torch.tanh(u)
         action = y * self.action_scale
 

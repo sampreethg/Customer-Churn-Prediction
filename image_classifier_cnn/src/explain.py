@@ -7,8 +7,10 @@ driving CNN classification decisions on input imagery.
 
 from pathlib import Path
 from typing import List, Optional, Tuple
+
 import cv2
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -246,7 +248,7 @@ def generate_and_save_gradcam_visual(
     plt.close()
 
     print(f"Grad-CAM visual explainability chart exported to: {save_path.resolve()}")
-    print(f"  Target: Ground Truth='{true_label}' | Predicted='{pred_label}' ({confidence:.2%})")
+    print(f" Target: Ground Truth='{true_label}' | Predicted='{pred_label}' ({confidence:.2%})")
 
     return pred_label, confidence
 

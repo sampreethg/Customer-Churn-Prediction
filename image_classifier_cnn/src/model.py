@@ -6,6 +6,7 @@ with Batch Normalization, Dropout regularization, spatial pooling, and Softmax d
 """
 
 from typing import Tuple
+
 import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers
 

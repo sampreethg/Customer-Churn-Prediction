@@ -9,7 +9,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${BLUE}======================================================${NC}"
-echo -e "${BLUE}   Unified Multi-Domain AI Portfolio Hub: Launcher   ${NC}"
+echo -e "${BLUE} Unified Multi-Domain AI Portfolio Hub: Launcher ${NC}"
 echo -e "${BLUE}======================================================${NC}"
 
 # Step 1: Pre-flight System & Dependency Checks
@@ -23,7 +23,7 @@ fi
 command -v docker >/dev/null 2>&1 || { echo -e "${RED}Docker is required but not installed.${NC}"; exit 1; }
 docker compose version >/dev/null 2>&1 || { echo -e "${RED}Docker Compose v2 is required but not installed.${NC}"; exit 1; }
 
-echo -e "${GREEN}✓ Core toolchain detected: Python, Docker, and Docker Compose.${NC}"
+echo -e "${GREEN}[OK] Core toolchain detected: Python, Docker, and Docker Compose.${NC}"
 
 # Step 2: Model Artifact Verification
 echo -e "\n${YELLOW}[Step 2/5] Checking model artifacts...${NC}"
@@ -48,7 +48,7 @@ if [ $MISSING_ARTIFACTS -eq 1 ]; then
     echo -e "${YELLOW}Artifacts missing or incomplete. Running baseline orchestrator...${NC}"
     $PYTHON_CMD scripts/generate_baseline_artifacts.py
 else
-    echo -e "${GREEN}✓ All 4 model artifacts exist on disk.${NC}"
+    echo -e "${GREEN}[OK] All 4 model artifacts exist on disk.${NC}"
 fi
 
 # Step 3: Clean Existing Containers
@@ -78,20 +78,20 @@ done
 echo ""
 
 if [ $API_HEALTHY -eq 1 ]; then
-    echo -e "${GREEN}✓ FastAPI Gateway is online and healthy.${NC}"
+    echo -e "${GREEN}[OK] FastAPI Gateway is online and healthy.${NC}"
 else
-    echo -e "${RED}✗ FastAPI Gateway failed health check after 60 seconds.${NC}"
+    echo -e "${RED}[FAIL] FastAPI Gateway failed health check after 60 seconds.${NC}"
     echo -e "${YELLOW}--- Container Logs ---${NC}"
     docker compose logs --tail=50 hub_api
     exit 1
 fi
 
 echo -e "\n${GREEN}======================================================${NC}"
-echo -e "${GREEN}   Portfolio Hub is Live and Operational!            ${NC}"
+echo -e "${GREEN} Portfolio Hub is Live and Operational! ${NC}"
 echo -e "${GREEN}======================================================${NC}"
-echo -e "• Streamlit Dashboard:    ${BLUE}http://localhost:8501${NC}"
-echo -e "• FastAPI Swagger Docs:   ${BLUE}http://localhost:8000/docs${NC}"
-echo -e "• Gateway Health Check:   ${BLUE}http://localhost:8000/health${NC}"
-echo -e "\nTo view live container logs, run:   ${YELLOW}docker compose logs -f${NC}"
-echo -e "To cleanly tear down the hub, run:  ${YELLOW}docker compose down${NC}\n"
+echo -e "• Streamlit Dashboard: ${BLUE}http://localhost:8501${NC}"
+echo -e "• FastAPI Swagger Docs: ${BLUE}http://localhost:8000/docs${NC}"
+echo -e "• Gateway Health Check: ${BLUE}http://localhost:8000/health${NC}"
+echo -e "\nTo view live container logs, run: ${YELLOW}docker compose logs -f${NC}"
+echo -e "To cleanly tear down the hub, run: ${YELLOW}docker compose down${NC}\n"
 

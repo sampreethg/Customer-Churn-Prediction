@@ -72,7 +72,7 @@ def explain_model(
         Ranked DataFrame with columns ['Feature', 'Importance', 'Relative_Weight_Pct'].
     """
     print("\n" + "=" * 60)
-    print("           STAGE 3: FEATURE IMPORTANCE & RISK DRIVERS")
+    print(" STAGE 3: FEATURE IMPORTANCE & RISK DRIVERS")
     print("=" * 60)
 
     feature_names = get_feature_names(model)
@@ -104,13 +104,13 @@ def explain_model(
 
     print("\n[Actionable Business Insights]")
     top_features = importance_df.head(top_n)["Feature"].tolist()
-    print(f"  1. Primary churn hazard indicators are dominated by: {', '.join(top_features[:3])}.")
+    print(f" 1. Primary churn hazard indicators are dominated by: {', '.join(top_features[:3])}.")
     print(
-        "  2. Customers on short tenure with high monthly charges and month-to-month contracts "
+        " 2. Customers on short tenure with high monthly charges and month-to-month contracts "
         "exhibit the highest sensitivity to cancellation."
     )
     print(
-        "  3. Support ticket volume strongly signals friction - proactive outreach upon >= 3 tickets "
+        " 3. Support ticket volume strongly signals friction - proactive outreach upon >= 3 tickets "
         "can preemptively reduce churn."
     )
 
@@ -179,7 +179,7 @@ def _save_importance_plot(
         print(f"[Artifact Saved] Feature importance chart: {out_path.resolve()}")
         return
 
-    except ImportError:  # pragma: no cover
+    except ImportError: # pragma: no cover
         pass
 
     # Pure Pillow High-Resolution Rendering Fallback

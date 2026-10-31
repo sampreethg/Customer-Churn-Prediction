@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from api.app import app
 
-client = TestClient(app)
+client = TestClient(app, headers={"X-API-Key": "test-api-key"})
 
 
 def test_health_endpoint():
@@ -69,7 +69,7 @@ def test_predict_validation_error():
     Verify that invalid inputs (e.g., negative tenure, out-of-range values) trigger HTTP 422.
     """
     payload = {
-        "Tenure_Months": -5,  # Constraint: ge=0
+        "Tenure_Months": -5, # Constraint: ge=0
         "MonthlyCharges": 50.0,
         "TotalTickets": 0,
         "ContractType": "One year",
@@ -97,7 +97,7 @@ def test_predict_invalid_enum():
         "Tenure_Months": 12,
         "MonthlyCharges": 65.0,
         "TotalTickets": 1,
-        "ContractType": "Five year",  # Invalid enum
+        "ContractType": "Five year", # Invalid enum
         "TechSupport": "Yes",
         "PaymentMethod": "Credit card",
     }

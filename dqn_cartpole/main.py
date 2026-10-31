@@ -18,8 +18,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import torch
-
 from scripts.evaluate_agent import evaluate_agent
+
 from src.agent import DQNAgent
 from src.config import (
     ARTIFACTS_DIR,
@@ -48,16 +48,16 @@ def print_banner(title: str) -> None:
 
 def main():
     print_banner("PRODUCTION DEEP Q-NETWORK (DQN) CARTPOLE-V1 SYSTEM")
-    print(f"PyTorch Version:    {torch.__version__}")
+    print(f"PyTorch Version: {torch.__version__}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Compute Device:     {device}")
+    print(f"Compute Device: {device}")
     print(f"Target Environment: {ENV_NAME}")
-    print(f"Batch Size:         {BATCH_SIZE}")
-    print(f"Replay Buffer:      {BUFFER_CAPACITY} transitions")
-    print(f"Discount (Gamma):   {GAMMA}")
-    print(f"Learning Rate:      {LEARNING_RATE}")
-    print(f"Target Sync:        Polyak Soft Update (Tau={TAU})")
-    print(f"Solved Goal:        >= {SOLVED_REWARD} rolling reward\n")
+    print(f"Batch Size: {BATCH_SIZE}")
+    print(f"Replay Buffer: {BUFFER_CAPACITY} transitions")
+    print(f"Discount (Gamma): {GAMMA}")
+    print(f"Learning Rate: {LEARNING_RATE}")
+    print(f"Target Sync: Polyak Soft Update (Tau={TAU})")
+    print(f"Solved Goal: >= {SOLVED_REWARD} rolling reward\n")
 
     # Ensure output directories exist
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
@@ -103,7 +103,7 @@ def main():
         exists = path.is_file()
         size_kb = path.stat().st_size / 1024 if exists else 0.0
         status_str = f"[OK] ({size_kb:.1f} KB)" if exists else "[MISSING]"
-        print(f"  {label:<28}: {status_str:<18} -> {path.name}")
+        print(f" {label:<28}: {status_str:<18} -> {path.name}")
 
     print(f"\nFinal Deterministic Evaluation Score: {mean_eval_reward:.1f} / 500.0 pts")
     if mean_eval_reward >= SOLVED_REWARD:

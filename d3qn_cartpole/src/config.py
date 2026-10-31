@@ -9,23 +9,23 @@ from pathlib import Path
 
 # Environment Constants
 ENV_ID: str = "CartPole-v1"
-STATE_DIM: int = 4        # [cart_pos, cart_velocity, pole_angle, pole_angular_velocity]
-ACTION_DIM: int = 2       # [0: push cart left, 1: push cart right]
-SOLVED_THRESHOLD: float = 490.0  # D3QN benchmark criteria over 100 consecutive episodes
+STATE_DIM: int = 4 # [cart_pos, cart_velocity, pole_angle, pole_angular_velocity]
+ACTION_DIM: int = 2 # [0: push cart left, 1: push cart right]
+SOLVED_THRESHOLD: float = 490.0 # D3QN benchmark criteria over 100 consecutive episodes
 MAX_STEPS_PER_EPISODE: int = 500
 
 # D3QN Hyperparameters
 BATCH_SIZE: int = 64
-GAMMA: float = 0.99               # Bellman temporal discount factor
-TAU: float = 0.005                # Soft Polyak target network update interpolation rate
-LR: float = 1e-3                  # AdamW learning rate
-BUFFER_CAPACITY: int = 20000      # Bounded experience replay memory capacity
-EPSILON_START: float = 1.0        # Initial exploration probability
-EPSILON_END: float = 0.02         # Exploration floor
-EPSILON_DECAY: float = 0.995      # Multiplicative exploration decay per episode
-MAX_EPISODES: int = 500           # Maximum training episodes
-EVAL_WINDOW: int = 100            # Rolling evaluation window size
-SEED: int = 42                    # Deterministic random seed
+GAMMA: float = 0.99 # Bellman temporal discount factor
+TAU: float = 0.005 # Soft Polyak target network update interpolation rate
+LR: float = 1e-3 # AdamW learning rate
+BUFFER_CAPACITY: int = 20000 # Bounded experience replay memory capacity
+EPSILON_START: float = 1.0 # Initial exploration probability
+EPSILON_END: float = 0.02 # Exploration floor
+EPSILON_DECAY: float = 0.995 # Multiplicative exploration decay per episode
+MAX_EPISODES: int = 500 # Maximum training episodes
+EVAL_WINDOW: int = 100 # Rolling evaluation window size
+SEED: int = 42 # Deterministic random seed
 
 # File System Directories & Paths
 BASE_DIR: Path = Path(__file__).resolve().parent.parent

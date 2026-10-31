@@ -7,7 +7,9 @@ rolling moving averages, exploration epsilon decay curves, and the 475-point sol
 
 from pathlib import Path
 from typing import List, Optional
+
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -88,7 +90,7 @@ def plot_learning_curve(
             linestyle=":",
             linewidth=1.8,
         )
-        ax2.set_ylabel("Exploration Epsilon ($\epsilon$)", fontsize=11, color="#d97706", labelpad=8)
+        ax2.set_ylabel(r"Exploration Epsilon ($\epsilon$)", fontsize=11, color="#d97706", labelpad=8)
         ax2.tick_params(axis="y", labelcolor="#d97706")
         ax2.set_ylim(0.0, 1.05)
 

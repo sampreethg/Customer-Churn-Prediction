@@ -2,16 +2,23 @@
 Main Unified FastAPI Application for Multi-Domain AI Portfolio Hub.
 
 Orchestrates model lifecycles across Tabular, Vision, NLP, and Reinforcement Learning domains,
-exposing modular routers under /api/v1 with comprehensive health and system telemetry.
+exposing modular routers under /api/v1 with health and system telemetry.
 """
 
-from contextlib import asynccontextmanager
+import logging
+import os
 import time
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
 import joblib
 import torch
+from fastapi import Depends, FastAPI, Request, Response, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+logger = logging.getLogger("ai_portfolio_hub.gateway")
+
+from .auth import require_api_key
 from .config import (
     CHURN_MODEL_PATH,
     DEVICE,
@@ -32,7 +39,7 @@ async def lifespan(app: FastAPI):
     Load all four specialized AI models into app.state at startup.
     """
     print("\n" + "=" * 65)
-    print("      INITIALIZING MULTI-DOMAIN AI PORTFOLIO GATEWAY")
+    print(" INITIALIZING MULTI-DOMAIN AI PORTFOLIO GATEWAY")
     print("=" * 65)
     print(f"Target Compute Device: {DEVICE}")
 
@@ -104,7 +111,7 @@ async def lifespan(app: FastAPI):
         from d3qn_cartpole.src.model import DuelingDQN
         rl_net = DuelingDQN(state_dim=4, action_dim=2).to(DEVICE)
         if RL_MODEL_PATH.is_file():
-            checkpoint = torch.load(RL_MODEL_PATH, map_location=DEVICE)
+            checkpoint = torch.load(RL_MODEL_PATH, map_location=DEVICE, weights_only=True)
             try:
                 rl_net.load_state_dict(checkpoint)
             except Exception:
@@ -128,7 +135,10 @@ async def lifespan(app: FastAPI):
 
     # 5. Initialize Production RAG Pipeline
     try:
-        from rag.pipeline import RAGPipeline
+        try:
+            from ..rag.pipeline import RAGPipeline
+        except (ImportError, ValueError):
+            from ai_portfolio_hub.rag.pipeline import RAGPipeline
         app.state.rag_pipeline = RAGPipeline()
         # Seed core knowledge base
         app.state.rag_pipeline.ingest_document(
@@ -158,20 +168,49 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Configured CORS with explicit origins
+allowed_origins_raw = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:8501,http://127.0.0.1:8501,http://localhost:3000,http://127.0.0.1:3000",
+)
+allowed_origins = [orig.strip() for orig in allowed_origins_raw.split(",") if orig.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
 )
 
-# Mount Domain Routers with /api/v1 Prefix
-app.include_router(tabular.router, prefix="/api/v1")
-app.include_router(vision.router, prefix="/api/v1")
-app.include_router(nlp.router, prefix="/api/v1")
-app.include_router(rl.router, prefix="/api/v1")
-app.include_router(rag.router, prefix="/api/v1")
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Enforce strict baseline security headers across all responses."""
+    response: Response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """Prevent unhandled internal stack traces from leaking to clients."""
+    logger.exception("Unhandled server exception processing %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "An internal server error occurred while processing the request."},
+    )
+
+
+# Mount Domain Routers with /api/v1 Prefix and API Key Authentication
+app.include_router(tabular.router, prefix="/api/v1", dependencies=[Depends(require_api_key)])
+app.include_router(vision.router, prefix="/api/v1", dependencies=[Depends(require_api_key)])
+app.include_router(nlp.router, prefix="/api/v1", dependencies=[Depends(require_api_key)])
+app.include_router(rl.router, prefix="/api/v1", dependencies=[Depends(require_api_key)])
+app.include_router(rag.router, prefix="/api/v1", dependencies=[Depends(require_api_key)])
 
 
 @app.get("/health", response_model=SystemHealthResponse, tags=["Diagnostics"])

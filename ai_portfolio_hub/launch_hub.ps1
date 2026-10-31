@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "======================================================" -ForegroundColor Cyan
-Write-Host "   Unified Multi-Domain AI Portfolio Hub: Launcher   " -ForegroundColor Cyan
+Write-Host " Unified Multi-Domain AI Portfolio Hub: Launcher " -ForegroundColor Cyan
 Write-Host "======================================================" -ForegroundColor Cyan
 
 # Step 1: Pre-flight checks
@@ -83,11 +83,11 @@ if ($apiHealthy) {
 }
 
 Write-Host "`n======================================================" -ForegroundColor Green
-Write-Host "   Portfolio Hub is Live and Operational!            " -ForegroundColor Green
+Write-Host " Portfolio Hub is Live and Operational! " -ForegroundColor Green
 Write-Host "======================================================" -ForegroundColor Green
-Write-Host "- Streamlit Dashboard:    http://localhost:8501" -ForegroundColor Cyan
-Write-Host "- FastAPI Swagger Docs:   http://localhost:8000/docs" -ForegroundColor Cyan
-Write-Host "- Gateway Health Check:   http://localhost:8000/health" -ForegroundColor Cyan
-Write-Host "`nTo view live container logs, run:   docker compose logs -f" -ForegroundColor Yellow
-Write-Host "To cleanly tear down the hub, run:  docker compose down`n" -ForegroundColor Yellow
+Write-Host "- Streamlit Dashboard: http://localhost:8501" -ForegroundColor Cyan
+Write-Host "- FastAPI Swagger Docs: http://localhost:8000/docs" -ForegroundColor Cyan
+Write-Host "- Gateway Health Check: http://localhost:8000/health" -ForegroundColor Cyan
+Write-Host "`nTo view live container logs, run: docker compose logs -f" -ForegroundColor Yellow
+Write-Host "To cleanly tear down the hub, run: docker compose down`n" -ForegroundColor Yellow
 

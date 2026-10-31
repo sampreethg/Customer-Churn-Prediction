@@ -7,10 +7,10 @@ Endpoints:
 """
 
 import time
-from typing import Dict
-from fastapi import APIRouter, HTTPException, Request, status
+
 import torch
 import torch.nn.functional as F
+from fastapi import APIRouter, Request
 
 from ..config import DEVICE, NLP_CLASSES
 from ..schemas import NLPInput, NLPOutput
@@ -71,7 +71,7 @@ async def analyze_sentiment(payload: NLPInput, request: Request):
 
 
 def _heuristic_sentiment(text: str):
-    """Robust sentiment fallback lexicon heuristic."""
+    """Fallback rule-based sentiment lexicon scorer."""
     text_lower = text.lower()
     positive_words = {"great", "good", "excellent", "love", "awesome", "fast", "helpful", "best", "happy", "recommend"}
     negative_words = {"bad", "poor", "terrible", "slow", "broken", "hate", "worst", "unhappy", "issue", "problem", "cancel"}

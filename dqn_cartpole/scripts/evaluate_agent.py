@@ -7,6 +7,7 @@ evaluates pole balance stability, and prints per-trial metrics.
 
 import sys
 from pathlib import Path
+
 import gymnasium as gym
 import numpy as np
 
@@ -45,7 +46,7 @@ def evaluate_agent(
         Mean reward across evaluation episodes.
     """
     print("\n" + "=" * 65)
-    print(f"       EVALUATING TRAINED DQN POLICY: {env_name}")
+    print(f" EVALUATING TRAINED DQN POLICY: {env_name}")
     print("=" * 65)
 
     if not model_path.is_file():
@@ -79,7 +80,7 @@ def evaluate_agent(
 
         rewards.append(total_reward)
         status = "[PERFECT 500]" if total_reward >= 500.0 else f"[{total_reward:.0f} steps]"
-        print(f"  Trial {episode:02d}/{num_episodes:02d} | Reward: {total_reward:5.1f} / {MAX_STEPS_PER_EPISODE} {status}")
+        print(f" Trial {episode:02d}/{num_episodes:02d} | Reward: {total_reward:5.1f} / {MAX_STEPS_PER_EPISODE} {status}")
 
     env.close()
 
@@ -88,10 +89,10 @@ def evaluate_agent(
 
     print("\n" + "-" * 65)
     print(f"Evaluation Summary ({num_episodes} Trials):")
-    print(f"  Mean Reward:        {mean_reward:.2f} +/- {std_reward:.2f}")
-    print(f"  Max Reward:         {max(rewards):.2f}")
-    print(f"  Min Reward:         {min(rewards):.2f}")
-    print(f"  Success Rate (500): {sum(1 for r in rewards if r >= 500.0) / num_episodes * 100:.1f}%")
+    print(f" Mean Reward: {mean_reward:.2f} +/- {std_reward:.2f}")
+    print(f" Max Reward: {max(rewards):.2f}")
+    print(f" Min Reward: {min(rewards):.2f}")
+    print(f" Success Rate (500): {sum(1 for r in rewards if r >= 500.0) / num_episodes * 100:.1f}%")
     print("-" * 65 + "\n")
 
     return mean_reward

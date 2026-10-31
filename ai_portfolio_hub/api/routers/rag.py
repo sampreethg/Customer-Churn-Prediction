@@ -4,29 +4,35 @@ Exposes endpoints for document ingestion and grounded question answering with ci
 Supports both JSON payload queries and directory/file indexing.
 """
 
+import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Request
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from ..rate_limiter import rate_limit
 from ..schemas import RAGIngestRequest, RAGIngestResponse
+
+logger = logging.getLogger("rag.router")
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
 router = APIRouter(prefix="/rag", tags=["Generative AI - Production RAG"])
 
 
 class DirectoryIndexRequest(BaseModel):
-    directory_path: str = Field(..., description="Path to folder containing PDF, MD, or TXT documents")
+    directory_path: str = Field(..., max_length=260, description="Path to folder containing PDF, MD, or TXT documents")
 
 
 class FlexibleQueryRequest(BaseModel):
-    query: Optional[str] = Field(None, description="Query string")
-    question: Optional[str] = Field(None, description="Alternative question string")
+    query: Optional[str] = Field(None, max_length=1000, description="Query string")
+    question: Optional[str] = Field(None, max_length=1000, description="Alternative question string")
     top_k: Optional[int] = Field(3, ge=1, le=20, description="Top-k citations to retrieve")
     dense_top_k: Optional[int] = Field(8, ge=1, le=50, description="Dense candidates")
     rerank_top_n: Optional[int] = Field(3, ge=1, le=10, description="Reranked top-n")
 
 
-@router.post("/ingest", response_model=RAGIngestResponse)
+@router.post("/ingest", response_model=RAGIngestResponse, dependencies=[Depends(rate_limit(5))])
 async def ingest_document(payload: RAGIngestRequest, request: Request):
     """
     Ingest and index a document into the RAG vector store with recursive chunking.
@@ -42,13 +48,14 @@ async def ingest_document(payload: RAGIngestRequest, request: Request):
         result = rag_pipeline.ingest_document(doc_id=payload.doc_id, text=payload.text)
         return RAGIngestResponse(**result)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Document ingestion failed: {str(exc)}")
+        logger.error("Document ingestion error: %s", exc)
+        raise HTTPException(status_code=500, detail="Document ingestion failed.") from None
 
 
-@router.post("/index-docs")
+@router.post("/index-docs", dependencies=[Depends(rate_limit(5))])
 async def index_docs_directory(payload: DirectoryIndexRequest, request: Request):
     """
-    Batch index all documents (.txt, .md, .pdf) in a given directory path.
+    Batch index all documents (.txt, .md, .pdf) in a given directory path within workspace.
     """
     rag_pipeline = getattr(request.app.state, "rag_pipeline", None)
     if rag_pipeline is None:
@@ -57,10 +64,26 @@ async def index_docs_directory(payload: DirectoryIndexRequest, request: Request)
             detail="RAG pipeline is not initialized on the gateway.",
         )
 
-    dir_path = Path(payload.directory_path)
-    if not dir_path.exists() or not dir_path.is_dir():
-        # Create or handle gracefully
-        dir_path.mkdir(parents=True, exist_ok=True)
+    raw_path = payload.directory_path.strip()
+    if not raw_path or ".." in raw_path or "\0" in raw_path:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid directory path: traversal sequences are forbidden.",
+        )
+
+    resolved_path = (WORKSPACE_ROOT / raw_path).resolve() if not Path(raw_path).is_absolute() else Path(raw_path).resolve()
+    try:
+        resolved_path.relative_to(WORKSPACE_ROOT)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Forbidden path: directory must reside within repository workspace.",
+        ) from None
+
+    if not resolved_path.exists() or not resolved_path.is_dir():
+        resolved_path.mkdir(parents=True, exist_ok=True)
+
+    dir_path = resolved_path
 
     indexed_count = 0
     total_chunks = 0
@@ -145,4 +168,5 @@ async def query_rag(payload: FlexibleQueryRequest, request: Request):
             "hallucination_guardrail_triggered": result.get("hallucination_guardrail_triggered", False),
         }
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"RAG query execution failed: {str(exc)}")
+        logger.error("RAG query execution error: %s", exc)
+        raise HTTPException(status_code=500, detail="RAG query execution failed.") from None

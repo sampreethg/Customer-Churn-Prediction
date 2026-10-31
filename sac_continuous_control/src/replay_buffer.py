@@ -1,6 +1,7 @@
 """High-throughput Experience Replay Buffer for Continuous-Action Reinforcement Learning."""
 
 from typing import Dict
+
 import numpy as np
 import torch
 

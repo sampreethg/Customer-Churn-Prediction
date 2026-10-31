@@ -4,9 +4,9 @@ Exports neural network architectures (e.g. DistilBERT and vision heads) to ONNX 
 applies INT8 dynamic post-training quantization, and benchmarks latency speedups.
 """
 
-import sys
 import time
 from pathlib import Path
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -22,13 +22,13 @@ def benchmark_model(model_fn, sample_inputs, n_runs=100):
     # Warmup
     for _ in range(10):
         model_fn(sample_inputs)
-    
+
     times = []
     for _ in range(n_runs):
         t0 = time.perf_counter()
         model_fn(sample_inputs)
         times.append((time.perf_counter() - t0) * 1000.0)
-    
+
     return {
         "mean_ms": np.mean(times),
         "p50_ms": np.percentile(times, 50),
@@ -80,13 +80,13 @@ def optimize_nlp_transformer():
         torch.save(int8_model.state_dict(), out_path)
 
         speedup = fp32_metrics["mean_ms"] / max(1e-4, int8_metrics["mean_ms"])
-        print(f"      FP32 Mean Latency: {fp32_metrics['mean_ms']:.2f} ms")
-        print(f"      INT8 Mean Latency: {int8_metrics['mean_ms']:.2f} ms")
-        print(f"      Inference Speedup: {speedup:.2f}x ({int8_metrics['throughput']:.1f} req/sec)")
-        print(f"      Saved quantized weights: {out_path}")
+        print(f" FP32 Mean Latency: {fp32_metrics['mean_ms']:.2f} ms")
+        print(f" INT8 Mean Latency: {int8_metrics['mean_ms']:.2f} ms")
+        print(f" Inference Speedup: {speedup:.2f}x ({int8_metrics['throughput']:.1f} req/sec)")
+        print(f" Saved quantized weights: {out_path}")
 
     except Exception as exc:
-        print(f"      [Warning] Optimization note: {exc}")
+        print(f" [Warning] Optimization note: {exc}")
 
 
 def optimize_rl_actor():
@@ -109,7 +109,7 @@ def optimize_rl_actor():
     model = DuelingDQN()
     if rl_model_path.is_file():
         try:
-            model.load_state_dict(torch.load(rl_model_path, map_location="cpu"))
+            model.load_state_dict(torch.load(rl_model_path, map_location="cpu", weights_only=True))
         except Exception:
             pass
     model.eval()
@@ -128,14 +128,14 @@ def optimize_rl_actor():
             dynamic_axes={"state": {0: "batch_size"}, "q_values": {0: "batch_size"}},
             opset_version=14,
         )
-        print(f"      Exported ONNX Model: {onnx_path}")
+        print(f" Exported ONNX Model: {onnx_path}")
     except Exception as exc:
-        print(f"      [Notice] ONNX Export note: {exc}")
+        print(f" [Notice] ONNX Export note: {exc}")
 
 
 if __name__ == "__main__":
     print("=" * 65)
-    print("      MODEL INFERENCE ACCELERATION & INT8 BENCHMARK")
+    print(" MODEL INFERENCE ACCELERATION & INT8 BENCHMARK")
     print("=" * 65)
     optimize_nlp_transformer()
     optimize_rl_actor()
