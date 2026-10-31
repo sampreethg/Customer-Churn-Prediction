@@ -61,7 +61,7 @@ jobs:
           pip install tensorflow-cpu
           pip install -r requirements.txt
           pip install -r ai_portfolio_hub/requirements.txt || true
-          pip install opencv-python-headless gymnasium transformers sentence-transformers python-multipart pypdf scipy onnx onnxruntime pytest pytest-cov
+          pip install opencv-python-headless gymnasium transformers sentence-transformers python-multipart pypdf scipy onnx onnxruntime pytest pytest-cov pytest-asyncio
 
       - name: Generate Churn Training Data & Baseline Artifacts
         run: |

@@ -5,10 +5,10 @@ Validates Slack/CRM payload schemas, asynchronous dispatch logic, threshold gati
 exponential backoff retries, and graceful recovery under external webhook failures.
 """
 
+import asyncio
 from unittest.mock import AsyncMock, patch
 
 import httpx
-import pytest
 from fastapi.testclient import TestClient
 
 from api.app import app
@@ -56,89 +56,95 @@ def test_generic_crm_payload_builder():
     assert len(payload["data"]["primary_risk_drivers"]) == 1
 
 
-@pytest.mark.asyncio
-async def test_high_risk_triggers_webhook():
+def test_high_risk_triggers_webhook():
     """
     Assert that a churn probability >= threshold triggers outbound webhook dispatch.
     """
-    notifier = WebhookNotifier(
-        slack_webhook_url="https://hooks.slack.com/services/TEST/SLACK/WEBHOOK",
-        crm_webhook_url="https://api.crm.example.com/webhooks/churn",
-        alert_threshold=0.70,
-    )
-
-    mock_resp = httpx.Response(200, request=httpx.Request("POST", "https://test.com"))
-
-    with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
-        mock_post.return_value = mock_resp
-
-        result = await notifier.dispatch_retention_alert(
-            customer_id="CUST-1234",
-            prob=0.82,
-            risk_level="High",
-            action="Priority intervention",
-            top_factors=[{"feature_name": "Tenure_Months", "shap_value": 0.12}],
+    async def _run():
+        notifier = WebhookNotifier(
+            slack_webhook_url="https://hooks.slack.com/services/TEST/SLACK/WEBHOOK",
+            crm_webhook_url="https://api.crm.example.com/webhooks/churn",
+            alert_threshold=0.70,
         )
 
-        assert result["status"] == "dispatched"
-        assert result["customer_id"] == "CUST-1234"
-        assert mock_post.call_count == 2
-        assert result["results"]["Slack"]["success"] is True
-        assert result["results"]["CRM"]["success"] is True
+        mock_resp = httpx.Response(200, request=httpx.Request("POST", "https://test.com"))
+
+        with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
+            mock_post.return_value = mock_resp
+
+            result = await notifier.dispatch_retention_alert(
+                customer_id="CUST-1234",
+                prob=0.82,
+                risk_level="High",
+                action="Priority intervention",
+                top_factors=[{"feature_name": "Tenure_Months", "shap_value": 0.12}],
+            )
+
+            assert result["status"] == "dispatched"
+            assert result["customer_id"] == "CUST-1234"
+            assert mock_post.call_count == 2
+            assert result["results"]["Slack"]["success"] is True
+            assert result["results"]["CRM"]["success"] is True
+
+    asyncio.run(_run())
 
 
-@pytest.mark.asyncio
-async def test_low_risk_skips_webhook():
+def test_low_risk_skips_webhook():
     """
     Assert that a churn probability < threshold skips webhook dispatch cleanly without HTTP calls.
     """
-    notifier = WebhookNotifier(
-        slack_webhook_url="https://hooks.slack.com/services/TEST/SLACK/WEBHOOK",
-        alert_threshold=0.70,
-    )
-
-    with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
-        result = await notifier.dispatch_retention_alert(
-            customer_id="CUST-5678",
-            prob=0.25,
-            risk_level="Low",
-            action="Standard engagement",
+    async def _run():
+        notifier = WebhookNotifier(
+            slack_webhook_url="https://hooks.slack.com/services/TEST/SLACK/WEBHOOK",
+            alert_threshold=0.70,
         )
 
-        assert result["status"] == "skipped"
-        assert result["reason"] == "below_threshold"
-        assert mock_post.call_count == 0
+        with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
+            result = await notifier.dispatch_retention_alert(
+                customer_id="CUST-5678",
+                prob=0.25,
+                risk_level="Low",
+                action="Standard engagement",
+            )
+
+            assert result["status"] == "skipped"
+            assert result["reason"] == "below_threshold"
+            assert mock_post.call_count == 0
+
+    asyncio.run(_run())
 
 
-@pytest.mark.asyncio
-async def test_webhook_failure_graceful_recovery():
+def test_webhook_failure_graceful_recovery():
     """
     Verify that an HTTP 500 error from external webhooks is caught, retried,
     and logged gracefully without raising unhandled exceptions.
     """
-    notifier = WebhookNotifier(
-        slack_webhook_url="https://hooks.slack.com/services/FAIL/500",
-        alert_threshold=0.70,
-    )
-
-    fail_resp = httpx.Response(500, request=httpx.Request("POST", "https://fail.com"))
-
-    with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
-        mock_post.return_value = fail_resp
-
-        result = await notifier.dispatch_retention_alert(
-            customer_id="CUST-FAIL",
-            prob=0.91,
-            risk_level="High",
-            action="Emergency retention",
+    async def _run():
+        notifier = WebhookNotifier(
+            slack_webhook_url="https://hooks.slack.com/services/FAIL/500",
+            alert_threshold=0.70,
         )
 
-        # Confirm retried and completed without crashing
-        assert result["status"] == "dispatched"
-        assert (
-            result["results"]["Slack"]["success"] is True or "error" in result["results"]["Slack"]
-        )
-        assert mock_post.call_count >= 1
+        fail_resp = httpx.Response(500, request=httpx.Request("POST", "https://fail.com"))
+
+        with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
+            mock_post.return_value = fail_resp
+
+            result = await notifier.dispatch_retention_alert(
+                customer_id="CUST-FAIL",
+                prob=0.91,
+                risk_level="High",
+                action="Emergency retention",
+            )
+
+            # Confirm retried and completed without crashing
+            assert result["status"] == "dispatched"
+            assert (
+                result["results"]["Slack"]["success"] is True or "error" in result["results"]["Slack"]
+            )
+            assert mock_post.call_count >= 1
+
+    asyncio.run(_run())
 
 
 def test_api_predict_triggers_background_alert():
