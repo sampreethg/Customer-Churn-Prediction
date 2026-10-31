@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: churn_api
+    environment:
+      - MODEL_PATH=/app/models/best_churn_model.joblib
+      - LOG_LEVEL=info
+    volumes:
+      - ./models:/app/models:ro
+      - ./artifacts:/app/artifacts:ro
+    ports:
+      - "8000:8000"
+    networks:
+      - churn_network
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: churn_dashboard
+    environment:
+      - API_BASE_URL=http://api:8000
+      - MODEL_PATH=/app/models/best_churn_model.joblib
+    volumes:
+      - ./models:/app/models:ro
+      - ./artifacts:/app/artifacts:ro
+    ports:
+      - "8501:8501"
+    networks:
+      - churn_network
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  churn_network:
+    driver: bridge
+

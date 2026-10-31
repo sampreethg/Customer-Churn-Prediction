@@ -1,0 +1,49 @@
+# Bytecode and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Testing and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Editor and IDE metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary training logs and test dumps
+*.log
+logs/
+test_dumps/
+tmp/
+temp/
+
+# Compose and container files (not needed inside images)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+README_DOCKER.md
+

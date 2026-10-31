@@ -1,0 +1,44 @@
+# Multi-stage / slim container for Streamlit analytics dashboard
+FROM python:3.11-slim
+
+# Prevent bytecode generation and configure unbuffered output streams
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Install minimal OS dependencies for health checks and network probes
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set standard application working directory
+WORKDIR /app
+
+# Create unprivileged system user for non-root execution
+RUN useradd -m -u 1000 -s /bin/bash dashuser
+
+# Cache pip dependency installation layer prior to copying application source
+COPY requirements.txt .
+RUN pip install --no-cache-dir --default-timeout=100 -r requirements.txt
+
+# Copy dashboard application codebase, shared components, models, and artifacts
+COPY dashboard/ /app/dashboard/
+COPY src/ /app/src/
+COPY models/ /app/models/
+COPY artifacts/ /app/artifacts/
+
+# Transition directory ownership to non-root user
+RUN chown -R dashuser:dashuser /app
+
+# Execute runtime process as non-root user
+USER dashuser
+
+# Expose Streamlit analytics dashboard port
+EXPOSE 8501
+
+# Automated native health check probe
+HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=10s \
+    CMD curl -f http://localhost:8501/_stcore/health || exit 1
+
+# Launch Streamlit server in headless mode bound to all network interfaces
+CMD ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+
